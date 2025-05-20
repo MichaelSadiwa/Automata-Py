@@ -11,41 +11,64 @@ regex_options = [
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
-    "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14"],
+    "states": [
+        "q0", "q1", "q2",      # S → aS, bS, aa, bb
+        "q3", "q4", "q5",      # A → ab, ba, aba
+        "q6", "q7", "q8",      # B → bab, aba, bbb
+        "q9", "q10", "q11",    # C → loops, then D or ^
+        "q12", "q13", "q14",   # D → bb, aa, aba
+        "q15", "q16", "q17",   # E → aaa, bab, bba
+        "q18", "q_accept"
+    ],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q13", "q14"],
+    "end_states": ["q_accept"],
     "transitions": {
+        # S → aS | bS | aa → A | bb → A
         ("q0", "a"): "q1",
         ("q0", "b"): "q2",
-        ("q1", "a"): "q3",
-        ("q1", "b"): "q2",
-        ("q2", "a"): "q3",
-        ("q2", "b"): "q4",
-        ("q3", "a"): "q5",
-        ("q3", "b"): "q5",
-        ("q4", "a"): "q3",
-        ("q4", "b"): "q6",
-        ("q5", "b"): "q6",
-        ("q5", "a"): "q7",
-        ("q6", "a"): "q5",
-        ("q6", "b"): "q8",
-        ("q7", "b"): "q9",
-        ("q7", "a"): "q11",
-        ("q8", "b"): "q7",
-        ("q8", "a"): "q10",
-        ("q9", "a"): "q11",
-        ("q9", "b"): "q11",
-        ("q10", "a"): "q14",
-        ("q10", "b"): "q14",
-        ("q11", "b"): "q10",
+        ("q1", "a"): "q3",  # aa → A
+        ("q2", "b"): "q3",  # bb → A
+        ("q1", "b"): "q0",  # loop back to q0
+        ("q2", "a"): "q0",
+
+        # A → abB, baB, abaB (goes to q6)
+        ("q3", "a"): "q4",        # aba → B
+        ("q3", "b"): "q5",        # ab or ba → B
+        ("q4", "b"): "q6",        # aba
+        ("q5", "b"): "q6",        # abb or bbb
+        ("q5", "a"): "q6",        # ba
+
+        # B → bab, aba, bbb → q9 (C)
+        ("q6", "b"): "q7",
+        ("q6", "a"): "q7",
+        ("q7", "a"): "q8",
+        ("q7", "b"): "q8",
+        ("q8", "b"): "q9",
+        ("q8", "a"): "q9",
+
+        # C → aC | bC | aaC | bbC | D | ^
+        ("q9", "a"): "q9",
+        ("q9", "b"): "q9",
+        ("q9", "a"): "q10",   # transition to D
+        ("q9", "b"): "q10",
+
+        # D → bbE, aaE, abaE
+        ("q10", "a"): "q11",
+        ("q10", "b"): "q11",
         ("q11", "a"): "q12",
+        ("q11", "b"): "q12",
+
+        # E → aaaF, babF, bbaF
         ("q12", "a"): "q13",
         ("q12", "b"): "q13",
-        ("q13", "a"): "q13",
+        ("q13", "a"): "q14",
         ("q13", "b"): "q14",
-        ("q14", "a"): "q13",
+
+        # F → loops | ^
+        ("q14", "a"): "q14",
         ("q14", "b"): "q14",
+        ("q14", ""): "q_accept"
     }
 }
 
