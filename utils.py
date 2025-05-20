@@ -11,11 +11,11 @@ regex_options = [
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
-  "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
+   "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
                "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q13","q14", "q18"],
+    "end_states": ["q18"],  # ONLY q18 should be accepting
     "transitions": {
         # (a+b)*
         ("q0", "a"): "q1",
@@ -51,7 +51,7 @@ dfa_1 = {
         ("q10", "a"): "q10",
         ("q10", "b"): "q10",
         
-        # MANDATORY (bb+aa+aba)
+        # MANDATORY (bb+aa/aba)
         ("q10", "a"): "q11",  # start aa/aba
         ("q10", "b"): "q11",  # start bb
         ("q11", "a"): "q12",  # first 'a' of aa/aaa/aba
@@ -59,19 +59,18 @@ dfa_1 = {
         
         # STRICT (aaa+bab+bba) enforcement
         ("q12", "a"): "q14",    # second 'a' of aaa
-        ("q14", "a"): "q18",     # aaa complete (accept)
+        ("q14", "a"): "q18",     # aaa complete
         ("q12", "b"): "q15",     # aba path
-        ("q15", "a"): "q18",     # aba complete (accept)
-        ("q13", "a"): "q18",     # bba complete (ba)
-        ("q13", "b"): "q16",     # bb → check bab/bba
-        ("q16", "a"): "q18",     # bab complete (a)
-        ("q16", "b"): "q17",     # invalid (bbb)
-        ("q17", "a"): "q18",     # bba complete
-        ("q17", "b"): "q17",     # invalid (bbbb...)
+        ("q15", "a"): "q18",     # aba complete
+        ("q13", "a"): "q16",     # bba path (ba)
+        ("q13", "b"): "q17",     # bab path (bb)
+        ("q16", "a"): "q18",     # bba complete
+        ("q17", "a"): "q18",     # bab complete
+        ("q17", "b"): "q17",     # invalid (bbb...)
         
         # (aaa+bab+bba)* looping
-        ("q18", "a"): "q12",  # start new aaa
-        ("q18", "b"): "q13"   # start new bab/bba
+        ("q18", "a"): "q12",
+        ("q18", "b"): "q13"
     }
 }
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
