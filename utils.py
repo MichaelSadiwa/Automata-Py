@@ -12,7 +12,7 @@ regex_options = [
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
     "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
-               "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20", "T"],
+               "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20", "qd"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
     "end_states": ["q20"],
@@ -54,36 +54,30 @@ dfa_1 = {
         ("q13", "b"): "q14", # Complete 'bab' or 'bbb'
         
         # (a+b+bb+aa)* part - optional
-        ("q14", "a"): "q14", # Continue with 'a'
-        ("q14", "b"): "q14", # Continue with 'b'
+        ("q14", "a"): "q15", # Continue to next part or start 'aa'
+        ("q14", "b"): "q16", # Continue to next part or start 'bb'
         
         # (bb+aa+aba) part
-        ("q14", "a"): "q15", # Start 'aa' or 'aba'
-        ("q14", "b"): "q16", # Start 'bb'
         ("q15", "a"): "q17", # Complete 'aa'
         ("q15", "b"): "q18", # 'ab' part of 'aba'
         ("q16", "b"): "q17", # Complete 'bb'
-        ("q16", "a"): "qd",  # Dead state - invalid
-        ("q17", "a"): "qd",  # Invalid following 'aa' or 'bb'
-        ("q17", "b"): "qd",  # Invalid following 'aa' or 'bb'
+        ("q16", "a"): "q14", # Back to optional section (part of a+b+bb+aa)*
+        ("q17", "a"): "q19", # Move to next part - start 'aaa'
+        ("q17", "b"): "q19", # Move to next part - start 'bab' or 'bba'
         ("q18", "a"): "q17", # Complete 'aba'
         ("q18", "b"): "qd",  # Dead state - invalid
         
         # (aaa+bab+bba) part
-        ("q17", "a"): "q19", # Start 'aaa'
-        ("q17", "b"): "q19", # Start 'bab' or 'bba'
-        ("q19", "a"): "q19", # Second 'a' in 'aaa' or 'bba'
-        ("q19", "b"): "q19", # Second 'b' in 'bab'
-        ("q19", "a"): "q20", # Complete 'aaa'
-        ("q19", "b"): "q20", # Complete 'bab' or 'bba'
+        ("q19", "a"): "q20", # Complete pattern with 'aaa' or 'bba'
+        ("q19", "b"): "q20", # Complete pattern with 'bab'
         
         # (aaa+bab+bba)* - optional repeats
         ("q20", "a"): "q19", # Start another pattern
         ("q20", "b"): "q19", # Start another pattern
         
         # Dead state transitions
-        ("T", "a"): "T",   # Stay in dead state
-        ("T", "b"): "T"    # Stay in dead state
+        ("qd", "a"): "qd",   # Stay in dead state
+        ("qd", "b"): "qd"    # Stay in dead state
     }
 }
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
