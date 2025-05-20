@@ -66,7 +66,6 @@ dfa_1 = {
         ("q13", "b"): "q16",     # bb → check bab/bba
         ("q16", "a"): "q18",     # bab complete (a)
         ("q16", "b"): "q17",     # invalid (bbb)
-        ("q17", "a"): "q18",     # bba complete
         ("q17", "b"): "q17",     # invalid (bbbb...)
         
         # (aaa+bab+bba)* looping
