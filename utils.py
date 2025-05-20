@@ -59,10 +59,10 @@ dfa_1 = {
         
         # STRICT (aaa+bab+bba) enforcement
         ("q12", "a"): "q14",    # second 'a' of aaa
-        ("q14", "a"): "q18",     # aaa complete (accept)
+        ("q14", "a"): "q17",     # aaa complete (accept)
         ("q12", "b"): "q15",     # aba path
-        ("q15", "a"): "q18",     # aba complete (accept)
-        ("q13", "a"): "q18",     # bba complete (ba)
+        ("q15", "a"): "q17",     # aba complete (accept)
+        ("q13", "a"): "q17",     # bba complete (ba)
         ("q13", "b"): "q16",     # bb → check bab/bba
         ("q16", "a"): "q18",     # bab complete (a)
         
