@@ -11,66 +11,91 @@ regex_options = [
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
-   "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
-               "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
+   "states": [
+        "q0",  # start
+        "q1", "q2",  # (a+b)*
+        "q3", "q4",  # aa / bb detection
+        "q5", "q6",  # (aa+bb)* loop
+        "q7", "q8", "q9",  # ab, ba, aba
+        "q10", "q11", "q12",  # bab, aba, bbb
+        "q13", "q14",  # (a+b+aa+bb)*
+        "q15", "q16", "q17",  # bb / aa / aba
+        "q18", "q19", "q20", "q21", "q22", "q23",  # aaa / bab / bba
+        "q_accept"  # accepting state
+    ],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q18"],  # ONLY q18 should be accepting
+    "end_states": ["q_accept"],
     "transitions": {
         # (a+b)*
         ("q0", "a"): "q1",
         ("q0", "b"): "q2",
-        
-        # (aa+bb) detection
-        ("q1", "a"): "q3",  # aa
+        ("q1", "a"): "q3",  # possible 'aa'
         ("q1", "b"): "q2",
         ("q2", "a"): "q1",
-        ("q2", "b"): "q4",  # bb
-        
+        ("q2", "b"): "q4",  # possible 'bb'
+
+        # (aa+bb)
+        ("q3", "a"): "q5",  # aa found, go to loop
+        ("q4", "b"): "q5",  # bb found, go to loop
+
         # (aa+bb)* looping
-        ("q3", "a"): "q3",
-        ("q3", "b"): "q5",  # start ab/aba
-        ("q4", "a"): "q6",  # start ba
-        ("q4", "b"): "q4",
-        
+        ("q5", "a"): "q6",
+        ("q5", "b"): "q6",
+        ("q6", "a"): "q3",  # look for aa
+        ("q6", "b"): "q4",  # or bb
+
         # (ab+ba+aba)
-        ("q5", "a"): "q7",  # aba
-        ("q5", "b"): "q4",  # invalid
-        ("q6", "a"): "q3",
-        ("q6", "b"): "q7",  # ba
-        ("q7", "a"): "q8",
-        ("q7", "b"): "q9",  # bab
-        
+        ("q3", "b"): "q7",  # ab
+        ("q4", "a"): "q8",  # ba
+        ("q3", "b"): "q7",
+        ("q3", "a"): "q9",  # aba start
+        ("q9", "b"): "q10",  # aba mid
+        ("q10", "a"): "q11",  # aba complete
+        ("q7", "end"): "q11",
+        ("q8", "end"): "q11",
+        ("q11", "a"): "q12",
+        ("q11", "b"): "q12",
+
         # (bab+aba+bbb)
-        ("q8", "a"): "q10",  # aba done
-        ("q8", "b"): "q10",
-        ("q9", "a"): "q10",  # bab done
-        ("q9", "b"): "q10",  # bbb done
-        
-        # (a+b+bb+aa)*
-        ("q10", "a"): "q10",
-        ("q10", "b"): "q10",
-        
-        # MANDATORY (bb+aa/aba)
-        ("q10", "a"): "q11",  # start aa/aba
-        ("q10", "b"): "q11",  # start bb
-        ("q11", "a"): "q12",  # first 'a' of aa/aaa/aba
-        ("q11", "b"): "q13",  # first 'b' of bb/bab/bba
-        
-        # STRICT (aaa+bab+bba) enforcement
-        ("q12", "a"): "q14",    # second 'a' of aaa
-        ("q14", "a"): "q18",     # aaa complete
-        ("q12", "b"): "q15",     # aba path
-        ("q15", "a"): "q18",     # aba complete
-        ("q13", "a"): "q16",     # bba path (ba)
-        ("q13", "b"): "q17",     # bab path (bb)
-        ("q16", "a"): "q18",     # bba complete
-        ("q17", "a"): "q18",     # bab complete
-        ("q17", "b"): "q17",     # invalid (bbb...)
-        
-        # (aaa+bab+bba)* looping
-        ("q18", "a"): "q18",
-        ("q18", "b"): "q18"
+        ("q12", "a"): "q13",  # aba or bab or bbb start
+        ("q12", "b"): "q14",
+
+        ("q13", "b"): "q15",  # aba → aba path
+        ("q15", "a"): "q14",  # aba complete
+
+        ("q14", "a"): "q15",  # bab
+        ("q14", "b"): "q14",  # bbb
+
+        # move to next segment
+        ("q14", "next"): "q16",  # (a+b+aa+bb)*
+
+        # (a+b+aa+bb)* → simplified as loop
+        ("q16", "a"): "q16",
+        ("q16", "b"): "q16",
+
+        # (bb+aa+aba)
+        ("q16", "a"): "q17",
+        ("q16", "b"): "q18",
+        ("q17", "a"): "q19",  # aa
+        ("q17", "b"): "q20",  # aba start
+        ("q20", "a"): "q21",  # aba complete
+        ("q18", "b"): "q19",  # bb
+
+        # (aaa+bab+bba)
+        ("q19", "a"): "q22",  # aaa
+        ("q22", "a"): "q23",  # aaa complete
+        ("q18", "a"): "q22",  # bba
+        ("q22", "a"): "q23",  # bba done
+        ("q18", "b"): "q22",  # bab start
+        ("q22", "a"): "q23",  # bab done
+
+        # Final loop (aaa+bab+bba)*
+        ("q23", "a"): "q23",
+        ("q23", "b"): "q23",
+
+        # Accept
+        ("q23", "end"): "q_accept"
     }
 }
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
