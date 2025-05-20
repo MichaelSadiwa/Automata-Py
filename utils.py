@@ -69,6 +69,14 @@ dfa_1 = {
         ("q14", "a"): "q14",
         ("q14", "b"): "q14",
         ("q14", ""): "q_accept"
+        ("q14", "a"): "q15",     # start aaa
+("q15", "a"): "q16",
+("q16", "a"): "q14",     # loop back to F
+
+("q14", "b"): "q17",     # start bab or bba
+("q17", "a"): "q18",
+("q18", "b"): "q14",     # b → bba or bab → F
+("q18", "a"): "q14",     # a → bab → F
     }
 }
 
