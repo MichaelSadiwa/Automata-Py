@@ -6,7 +6,7 @@ import utils
 def main():
     # Set page title and icon
     st.set_page_config(
-        page_title="Automata Project",
+        page_title="Automata Validator",
        
     )
 
@@ -46,7 +46,7 @@ def main():
         st.title("Automata Project")
         st.markdown(
             '''
-            This project is a web application that will convert the given regular expressions below to Deterministic Finite Automata (DFA), 
+            A web application that will validate strings and  convert the given regular expressions below to Deterministic Finite Automata (DFA), 
             Context-Free Grammars (CFG), and Pushdown Automata (PDA).
 
             **Regular Expressions**
