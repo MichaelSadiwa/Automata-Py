@@ -15,24 +15,18 @@ dfa_1 = {
              "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
   "alphabet": ["a", "b"],
   "start_state": "q0",
-  "end_states": ["q18"],
+  "end_states": ["q1adadada8"],
   "transitions": {
       # (a+b)*
-      ("q0", "a"): "q1",
-      ("q0", "b"): "q2",
-      ("q1", "a"): "q3",  # aa
-      ("q1", "b"): "q2",
-      ("q2", "a"): "q1",
-      ("q2", "b"): "q4",  # bb
-
-      # (aa+bb)*
+      ("q0", "a"): "q1",aa
+aca
+      # a(aa+bb)*
       ("q3", "a"): "q3",
       ("q3", "b"): "q5",
       ("q4", "a"): "q6",
-      ("q4", "b"): "q4",
-
-      # (ab+ba+aba)
-      ("q5", "a"): "q7",  # aba
+      ("q4", "bcq4",
+c
+      ("q5", "a"): "q7",  # abac
       ("q5", "b"): "q4",  # invalid
       ("q6", "a"): "q3",  # back to aa
       ("q6", "b"): "q7",  # ba
