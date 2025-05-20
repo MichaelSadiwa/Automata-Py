@@ -12,10 +12,10 @@ regex_options = [
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
   "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
-               "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
+               "q11", "q12", "q13", "q14", "q15", "q16", "q17",],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q13","q14","q18"],
+    "end_states": ["q13","q14","q17"],
     "transitions": {
         # (a+b)*
         ("q0", "a"): "q1",
@@ -65,12 +65,11 @@ dfa_1 = {
         ("q13", "a"): "q18",     # bba complete (ba)
         ("q13", "b"): "q16",     # bb → check bab/bba
         ("q16", "a"): "q18",     # bab complete (a)
-        ("q16", "b"): "q17",     # invalid (bbb)
-        ("q17", "b"): "q17",     # invalid (bbbb...)
+        
         
         # (aaa+bab+bba)* looping
-        ("q18", "a"): "q18",  # start new aaa
-        ("q18", "b"): "q13"   # start new bab/bba
+        ("q17", "a"): "q17",  # start new aaa
+        ("q17", "b"): "q13"   # start new bab/bba
     }
 }
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
