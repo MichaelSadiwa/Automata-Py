@@ -14,8 +14,9 @@ dfa_1 = {
     "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q8", "q11", "q12", "q15", "q17", "q18", "q19", "q20"],
+    "end_states": ["q11", "q17", "q18"],
     "transitions": {
+        # Initial prefix of (a+b)* leading to aa or bb
         ("q0", "a"): "q1",
         ("q0", "b"): "q2",
         ("q1", "a"): "q3",  # aa detected
@@ -76,7 +77,6 @@ dfa_1 = {
         ("q20", "b"): "q18",  # completed another aaa, bab, or bba
     }
 }
-
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
 dfa_2 = {
     "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"],
