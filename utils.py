@@ -82,11 +82,13 @@ dfa_2 = {
 
 # CFG for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 cfg_1 = '''
-        S -> XYZ \n
-        X -> aX | bX | aa | bb \n
-        Y -> aaY | bbY | ab | ba | aba \n
-        Z -> babZ | abaZ | bbbZ | aaZ | bb | aa | aba | aaaW | babW | bbaW \n
-        W -> aaaW | babW | bbaW | ^
+       S  -> aS | bS | aaA | bbA    
+       A  -> aaA | bbA | abB | baB | abaB
+       B  -> babC | abaC | bbbC
+       C  -> aC | bC | aaC | bbC | D | ^ 
+       D  -> bbE | aaE | abaE  
+       E  -> aaaF | babF | bbaF   
+       F  -> aaaF | babF | bbaF | ^ 
         '''
 
 # CFG for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
