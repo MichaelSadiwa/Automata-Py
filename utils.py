@@ -10,7 +10,7 @@ regex_options = [
 ]
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
-dfa_1 = {
+dfa_2 = {
     "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
@@ -39,6 +39,7 @@ dfa_1 = {
         
         # Paths for (bab+aba+bbb)
         ("q7", "b"): "q9",   # bab detected after ab
+        ("q8", "a"): "q7",   # transition for completing another potential aba sequence
         ("q8", "b"): "q9",   # bab detected after aba
         ("q5", "b"): "q10",  # bbb detected after bb
         ("q3", "b"): "q8",   # aba detected starting with a
