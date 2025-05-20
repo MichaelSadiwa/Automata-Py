@@ -43,7 +43,7 @@ def main():
 
     # Code block for title and description
     with title_con:
-        st.title("Automata Project")
+        st.title("Automata Theory")
         st.markdown(
             '''
             A web application that will validate strings and  convert the given regular expressions below to Deterministic Finite Automata (DFA), 
