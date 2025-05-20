@@ -15,7 +15,7 @@ dfa_1 = {
                "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q13,q18"],
+    "end_states": ["q13","q18"],
     "transitions": {
         # (a+b)*
         ("q0", "a"): "q1",
