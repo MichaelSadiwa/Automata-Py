@@ -11,46 +11,52 @@ regex_options = [
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
-    "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10"],
+   "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q10"],
+    "end_states": ["q12"],
     "transitions": {
-        # (a+b)* - can loop in q0 until seeing start of aa/bb
+        # (a+b)*
         ("q0", "a"): "q1",
         ("q0", "b"): "q2",
         
-        # Tracking first character for (aa+bb)
+        # Track first character for mandatory (aa+bb)
         ("q1", "a"): "q3",  # aa
         ("q1", "b"): "q2",   # continue b-path
         ("q2", "a"): "q1",   # continue a-path
         ("q2", "b"): "q4",   # bb
         
-        # (aa+bb)* - can loop in q3/q4
+        # (aa+bb)* looping
         ("q3", "a"): "q3",  # more aa
-        ("q3", "b"): "q5",  # start of ab/aba
-        ("q4", "a"): "q6",  # start of ba
+        ("q3", "b"): "q5",  # start ab/aba
+        ("q4", "a"): "q6",  # start ba
         ("q4", "b"): "q4",  # more bb
         
         # (ab+ba+aba)
         ("q5", "a"): "q7",  # aba (from ab-a)
-        ("q5", "b"): "q4",  # abb (invalid, go back to bb tracking)
+        ("q5", "b"): "q4",  # invalid (resets to bb tracking)
         ("q6", "a"): "q3",  # baa (continue as aa)
-        ("q6", "b"): "q7",  # bab (valid)
-        ("q7", "a"): "q8",  # abaa/abab/etc (move to next section)
-        ("q7", "b"): "q9",  # abb (potential bbb)
+        ("q6", "b"): "q7",  # ba → valid
+        ("q7", "a"): "q8",  # transition to next section
+        ("q7", "b"): "q9",  # potential bab/bbb
         
         # (bab+aba+bbb)
-        ("q8", "a"): "q8",  # (a+b+bb+aa)*
-        ("q8", "b"): "q8",
-        ("q9", "a"): "q8",
-        ("q9", "b"): "q8",  # bbb consumed
+        ("q8", "a"): "q10", # now in (a+b+bb+aa)*
+        ("q8", "b"): "q10",
+        ("q9", "a"): "q10", # bab consumed
+        ("q9", "b"): "q10", # bbb consumed
         
-        # (bb+aa+aba) - now in q8
-        ("q8", "a"): "q10",  # aa or start of aba
-        ("q8", "b"): "q10",  # bb
-        ("q10", "a"): "q10",  # (aaa+bab+bba)*
-        ("q10", "b"): "q10"
+        # (a+b+bb+aa)*
+        ("q10", "a"): "q10",
+        ("q10", "b"): "q10",
+        
+        # MANDATORY (bb+aa+aba)
+        ("q10", "a"): "q11", # start aa/aba
+        ("q10", "b"): "q11", # start bb
+        ("q11", "a"): "q12", # aa or second 'a' of aba
+        ("q11", "b"): "q12", # bb
+        ("q12", "a"): "q12", # (aaa+bab+bba)*
+        ("q12", "b"): "q12"
     }
 }
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
