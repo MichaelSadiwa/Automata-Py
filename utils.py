@@ -10,69 +10,68 @@ regex_options = [
 ]
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
-dfa_1 = {
-"states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
-             "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
-  "alphabet": ["a", "b"],
-  "start_state": "q0",
-  "end_states": ["q18"],
-  "transitions": {
-      # (a+b)*
-      ("q0", "a"): "q1",
-      ("q0", "b"): "q2",
-      ("q1", "a"): "q3",  # aa
-      ("q1", "b"): "q2",
-      ("q2", "a"): "q1",
-      ("q2", "b"): "q4",  # bb
-
-      # (aa+bb)*
-      ("q3", "a"): "q3",
-      ("q3", "b"): "q5",
-      ("q4", "a"): "q6",
-      ("q4", "b"): "q4",
-
-      # (ab+ba+aba)
-      ("q5", "a"): "q7",  # aba
-      ("q5", "b"): "q4",  # invalid
-      ("q6", "a"): "q3",  # back to aa
-      ("q6", "b"): "q7",  # ba
-
-      ("q7", "a"): "q8",
-      ("q7", "b"): "q9",  # bab or bbb
-
-      # (bab+aba+bbb)
-      ("q8", "a"): "q10",  # aba done
-      ("q8", "b"): "q10",
-      ("q9", "a"): "q10",  # bab done
-      ("q9", "b"): "q10",  # bbb done
-
-      # (a+b+aa+bb)* segment
-      ("q10", "a"): "q10",
-      ("q10", "b"): "q10",
-      ("q10", "a"): "q11",  # start bb/aa/aba group
-      ("q10", "b"): "q11",
-
-      # (bb+aa+aba)
-      ("q11", "a"): "q12",  # a-start
-      ("q11", "b"): "q13",  # b-start
-
-      # AAA / ABA path
-      ("q12", "a"): "q14",       # aa
-      ("q14", "a"): "q18",       # aaa
-      ("q12", "b"): "q15",       # aba
-      ("q15", "a"): "q18",       # aba
-
-      # BBB / BAB / BBA path
-      ("q13", "b"): "q16",       # bb
-      ("q13", "a"): "q17",       # ba
-
-      ("q16", "a"): "q18",       # bab
-      ("q17", "a"): "q18",       # bba
-
-      # (aaa+bab+bba)* looping
-      ("q18", "a"): "q11",
-      ("q18", "b"): "q11"
-  }
+ "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
+               "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
+    "alphabet": ["a", "b"],
+    "start_state": "q0",
+    "end_states": ["q13","q14", "q18"],
+    "transitions": {
+        # (a+b)*
+        ("q0", "a"): "q1",
+        ("q0", "b"): "q2",
+        
+        # (aa+bb) detection
+        ("q1", "a"): "q3",  # aa
+        ("q1", "b"): "q2",
+        ("q2", "a"): "q1",
+        ("q2", "b"): "q4",  # bb
+        
+        # (aa+bb)* looping
+        ("q3", "a"): "q3",
+        ("q3", "b"): "q5",  # start ab/aba
+        ("q4", "a"): "q6",  # start ba
+        ("q4", "b"): "q4",
+        
+        # (ab+ba+aba)
+        ("q5", "a"): "q7",  # aba
+        ("q5", "b"): "q4",  # invalid
+        ("q6", "a"): "q3",
+        ("q6", "b"): "q7",  # ba
+        ("q7", "a"): "q8",
+        ("q7", "b"): "q9",  # bab
+        
+        # (bab+aba+bbb)
+        ("q8", "a"): "q10",  # aba done
+        ("q8", "b"): "q10",
+        ("q9", "a"): "q10",  # bab done
+        ("q9", "b"): "q10",  # bbb done
+        
+        # (a+b+bb+aa)*
+        ("q10", "a"): "q10",
+        ("q10", "b"): "q10",
+        
+        # MANDATORY (bb+aa+aba)
+        ("q10", "a"): "q11",  # start aa/aba
+        ("q10", "b"): "q11",  # start bb
+        ("q11", "a"): "q12",  # first 'a' of aa/aaa/aba
+        ("q11", "b"): "q13",  # first 'b' of bb/bab/bba
+        
+        # STRICT (aaa+bab+bba) enforcement
+        ("q12", "a"): "q14",    # second 'a' of aaa
+        ("q14", "a"): "q18",     # aaa complete (accept)
+        ("q12", "b"): "q15",     # aba path
+        ("q15", "a"): "q18",     # aba complete (accept)
+        ("q13", "a"): "q18",     # bba complete (ba)
+        ("q13", "b"): "q16",     # bb → check bab/bba
+        ("q16", "a"): "q18",     # bab complete (a)
+        ("q16", "b"): "q17",     # invalid (bbb)
+        ("q17", "a"): "q18",     # bba complete
+        ("q17", "b"): "q17",     # invalid (bbbb...)
+        
+        # (aaa+bab+bba)* looping
+        ("q18", "a"): "q12",  # start new aaa
+        ("q18", "b"): "q13"   # start new bab/bba
+    }
 }
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
 dfa_2 = {
