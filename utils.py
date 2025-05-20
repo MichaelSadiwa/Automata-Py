@@ -22,35 +22,50 @@ dfa_1 = {
         ("q1", "b"): "q2",
         ("q2", "a"): "q1",
         ("q2", "b"): "q4",  # bb detected
+        
+        # After aa or bb, continue with (aa+bb)*
         ("q3", "a"): "q3",  # another aa
         ("q3", "b"): "q5",  # transition to potential ba or bb
         ("q4", "a"): "q6",  # transition to potential ab or aa
         ("q4", "b"): "q4",  # another bb
+        
+        # Paths for (ab+ba+aba)
         ("q5", "a"): "q7",  # ba detected
         ("q5", "b"): "q4",  # bb detected
         ("q6", "a"): "q3",  # aa detected
         ("q6", "b"): "q7",  # ab detected
         ("q7", "a"): "q8",  # aba detected
+        
+        # Paths for (bab+aba+bbb)
         ("q7", "b"): "q9",   # bab detected after ab
         ("q8", "b"): "q9",   # bab detected after aba
         ("q5", "b"): "q10",  # bbb detected after bb
         ("q3", "b"): "q8",   # aba detected starting with a
+        
+        # (a+b+bb+aa)* section
         ("q9", "a"): "q11",
         ("q9", "b"): "q11",
         ("q10", "a"): "q11",
         ("q10", "b"): "q11",
         ("q11", "a"): "q11",
         ("q11", "b"): "q11",
+        
+        # (bb+aa+aba) section
         ("q11", "a"): "q12",  # potential aa or aba
         ("q11", "b"): "q13",  # potential bb
         ("q12", "a"): "q14",  # aa detected
         ("q12", "b"): "q15",  # aba potential
+        ("q13", "a"): "q12",  # transition back to potential aa or aba path
         ("q13", "b"): "q14",  # bb detected
         ("q15", "a"): "q14",  # aba detected
+        
+        # (aaa+bab+bba) section
         ("q14", "a"): "q16",  # potential aaa or potential bba
         ("q14", "b"): "q16",  # potential bab
         ("q16", "a"): "q17",  # aaa or bba detected
         ("q16", "b"): "q18",  # bab detected
+        
+        # (aaa+bab+bba)* section - final states that can loop
         ("q17", "a"): "q19",  # starting new aaa
         ("q17", "b"): "q19",  # starting new bab or bba
         ("q18", "a"): "q19",  # starting new aaa
