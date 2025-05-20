@@ -10,42 +10,70 @@ regex_options = [
 ]
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
-dfa_1 = {
-    "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14"],
+dfa_2 = {
+    "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
-    "end_states": ["q13", "q14"],
+    "end_states": ["q8", "q11", "q12", "q15", "q17", "q18", "q19", "q20"],
     "transitions": {
+        # Initial prefix of (a+b)* leading to aa or bb
         ("q0", "a"): "q1",
         ("q0", "b"): "q2",
-        ("q1", "a"): "q3",
+        ("q1", "a"): "q3",  # aa detected
         ("q1", "b"): "q2",
-        ("q2", "a"): "q3",
-        ("q2", "b"): "q4",
-        ("q3", "a"): "q5",
-        ("q3", "b"): "q5",
-        ("q4", "a"): "q3",
-        ("q4", "b"): "q6",
-        ("q5", "b"): "q6",
-        ("q5", "a"): "q7",
-        ("q6", "a"): "q5",
-        ("q6", "b"): "q8",
-        ("q7", "b"): "q9",
-        ("q7", "a"): "q11",
-        ("q8", "b"): "q7",
-        ("q8", "a"): "q10",
+        ("q2", "a"): "q1",
+        ("q2", "b"): "q4",  # bb detected
+        
+        # After aa or bb, continue with (aa+bb)*
+        ("q3", "a"): "q3",  # another aa
+        ("q3", "b"): "q5",  # transition to potential ba or bb
+        ("q4", "a"): "q6",  # transition to potential ab or aa
+        ("q4", "b"): "q4",  # another bb
+        
+        # Paths for (ab+ba+aba)
+        ("q5", "a"): "q7",  # ba detected
+        ("q5", "b"): "q4",  # bb detected
+        ("q6", "a"): "q3",  # aa detected
+        ("q6", "b"): "q7",  # ab detected
+        ("q7", "a"): "q8",  # aba detected
+        
+        # Paths for (bab+aba+bbb)
+        ("q7", "b"): "q9",   # bab detected after ab
+        ("q8", "b"): "q9",   # bab detected after aba
+        ("q5", "b"): "q10",  # bbb detected after bb
+        ("q3", "b"): "q8",   # aba detected starting with a
+        
+        # (a+b+bb+aa)* section
         ("q9", "a"): "q11",
         ("q9", "b"): "q11",
-        ("q10", "a"): "q14",
-        ("q10", "b"): "q14",
-        ("q11", "b"): "q10",
-        ("q11", "a"): "q12",
-        ("q12", "a"): "q13",
-        ("q12", "b"): "q13",
-        ("q13", "a"): "q13",
-        ("q13", "b"): "q14",
-        ("q14", "a"): "q13",
-        ("q14", "b"): "q14",
+        ("q10", "a"): "q11",
+        ("q10", "b"): "q11",
+        ("q11", "a"): "q11",
+        ("q11", "b"): "q11",
+        
+        # (bb+aa+aba) section
+        ("q11", "a"): "q12",  # potential aa or aba
+        ("q11", "b"): "q13",  # potential bb
+        ("q12", "a"): "q14",  # aa detected
+        ("q12", "b"): "q15",  # aba potential
+        ("q13", "b"): "q14",  # bb detected
+        ("q15", "a"): "q14",  # aba detected
+        
+        # (aaa+bab+bba) section
+        ("q14", "a"): "q16",  # potential aaa or potential bba
+        ("q14", "b"): "q16",  # potential bab
+        ("q16", "a"): "q17",  # aaa or bba detected
+        ("q16", "b"): "q18",  # bab detected
+        
+        # (aaa+bab+bba)* section - final states that can loop
+        ("q17", "a"): "q19",  # starting new aaa
+        ("q17", "b"): "q19",  # starting new bab or bba
+        ("q18", "a"): "q19",  # starting new aaa
+        ("q18", "b"): "q19",  # starting new bab or bba
+        ("q19", "a"): "q20",
+        ("q19", "b"): "q20",
+        ("q20", "a"): "q17",  # completed another aaa, bab, or bba
+        ("q20", "b"): "q18",  # completed another aaa, bab, or bba
     }
 }
 
