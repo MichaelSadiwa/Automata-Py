@@ -15,8 +15,8 @@ def main():
         st.session_state.show_cfg = False
         st.session_state.show_pda = False
 
-    # Handle query params for styled button logic
-    query_params = st.experimental_get_query_params()
+    # Handle query params for styled button logic (new API)
+    query_params = st.query_params
     if "clear" in query_params:
         st.session_state.regex_input = "--- Select ---"
         st.session_state.string_input = ""
@@ -24,17 +24,17 @@ def main():
         st.session_state.placeholder_text = ""
         st.session_state.show_cfg = False
         st.session_state.show_pda = False
-        st.experimental_set_query_params()
+        st.query_params.clear()
 
     if "cfg" in query_params:
         st.session_state.show_cfg = not st.session_state.show_cfg
         st.session_state.show_pda = False
-        st.experimental_set_query_params()
+        st.query_params.clear()
 
     if "pda" in query_params:
         st.session_state.show_pda = not st.session_state.show_pda
         st.session_state.show_cfg = False
-        st.experimental_set_query_params()
+        st.query_params.clear()
 
     # Callback for regex selector
     def regex_input_callbk():
