@@ -3,12 +3,9 @@ import utils
 
 # Streamlit interface
 def main():
-    # Set page title and icon
-    st.set_page_config(
-        page_title="Automata Project",
-    )
+    st.set_page_config(page_title="Automata Project")
 
-    # Initialize Streamlit session state values
+    # Init session state
     if len(st.session_state) == 0:
         st.session_state.disabled = True
         st.session_state.placeholder_text = ""
@@ -31,13 +28,11 @@ def main():
 
         st.session_state.string_input = ""
 
-    # Interface container
     regex_to_dfa_con = st.container()
 
     with regex_to_dfa_con:
         st.subheader("Regex to DFA, CFG, & PDA")
 
-        # Select box for regex
         regex_input = st.selectbox(
             label="Select a Regular Expression",
             options=utils.regex_options,
@@ -45,70 +40,53 @@ def main():
             on_change=regex_input_callbk
         )
 
-        # Show styled buttons only if a regex is selected
+        # Show buttons only after a regex is selected
         if st.session_state.regex_input != "--- Select ---":
-            st.markdown(
-                """
+            st.markdown("""
                 <style>
-                .button-row {
-                    display: flex;
-                    justify-content: start;
-                    gap: 1rem;
-                    margin-top: 1rem;
-                    margin-bottom: 1.5rem;
-                }
-                .custom-btn {
+                .css-button {
                     background-color: #4CAF50;
-                    color: white;
                     border: none;
+                    color: white;
                     padding: 10px 20px;
                     text-align: center;
                     text-decoration: none;
+                    display: inline-block;
                     font-size: 16px;
                     border-radius: 8px;
+                    cursor: pointer;
                     transition: background-color 0.3s;
+                    margin-right: 10px;
                 }
-                .custom-btn:hover {
+                .css-button:hover {
                     background-color: #3e8e41;
                 }
                 </style>
+            """, unsafe_allow_html=True)
 
-                <div class="button-row">
-                    <form method="post">
-                        <button class="custom-btn" name="action" value="clear">🔄 Clear</button>
-                        <button class="custom-btn" name="action" value="cfg">📄 Show CFG</button>
-                        <button class="custom-btn" name="action" value="pda">📊 Show PDA</button>
-                    </form>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
+            col1, col2, col3 = st.columns(3)
 
-            # Capture button action
-            action = st.session_state.get("button_action", None)
-            if "action" in st.session_state:
-                action = st.session_state.action
+            with col1:
+                if st.button("🔄 Clear"):
+                    st.session_state.regex_input = "--- Select ---"
+                    st.session_state.string_input = ""
+                    st.session_state.disabled = True
+                    st.session_state.placeholder_text = ""
+                    st.session_state.show_cfg = False
+                    st.session_state.show_pda = False
+                    st.experimental_rerun()
 
-            if st.query_params.get("action") == ["clear"]:
-                st.session_state.regex_input = "--- Select ---"
-                st.session_state.string_input = ""
-                st.session_state.disabled = True
-                st.session_state.placeholder_text = ""
-                st.session_state.show_cfg = False
-                st.session_state.show_pda = False
-                st.query_params.clear()
+            with col2:
+                if st.button("📄 Show CFG"):
+                    st.session_state.show_cfg = not st.session_state.show_cfg
+                    st.session_state.show_pda = False
 
-            elif st.query_params.get("action") == ["cfg"]:
-                st.session_state.show_cfg = not st.session_state.show_cfg
-                st.session_state.show_pda = False
-                st.query_params.clear()
+            with col3:
+                if st.button("📊 Show PDA"):
+                    st.session_state.show_pda = not st.session_state.show_pda
+                    st.session_state.show_cfg = False
 
-            elif st.query_params.get("action") == ["pda"]:
-                st.session_state.show_pda = not st.session_state.show_pda
-                st.session_state.show_cfg = False
-                st.query_params.clear()
-
-        # Text input for string validation
+        # Input string
         string_input = st.text_input(
             label="Enter a string to check its validity for displayed DFA",
             key="string_input",
@@ -122,7 +100,7 @@ def main():
             disabled=st.session_state.disabled
         )
 
-        # Show DFA + CFG/PDA based on selection
+        # Show DFA/CFG/PDA
         if regex_input == utils.regex_options[1]:
             current_dfa = utils.dfa_1
             st.write("**Deterministic Finite Automaton**")
