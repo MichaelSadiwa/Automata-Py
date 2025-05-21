@@ -40,25 +40,21 @@ def main():
             on_change=regex_input_callbk
         )
 
-        # Show buttons only after a regex is selected
+        # Show stylish buttons after selection
         if st.session_state.regex_input != "--- Select ---":
             st.markdown("""
                 <style>
-                .css-button {
+                div.stButton > button {
                     background-color: #4CAF50;
-                    border: none;
                     color: white;
-                    padding: 10px 20px;
-                    text-align: center;
-                    text-decoration: none;
-                    display: inline-block;
+                    padding: 0.6em 1.2em;
                     font-size: 16px;
+                    border: none;
                     border-radius: 8px;
-                    cursor: pointer;
-                    transition: background-color 0.3s;
                     margin-right: 10px;
+                    transition: background-color 0.3s;
                 }
-                .css-button:hover {
+                div.stButton > button:hover {
                     background-color: #3e8e41;
                 }
                 </style>
