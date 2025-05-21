@@ -4,7 +4,7 @@ import time
 
 # Set Streamlit config (must be first)
 st.set_page_config(
-    page_title="Automata Compiler",
+    page_title="Automata Project",
     layout="wide",
     initial_sidebar_state="expanded"
 )
