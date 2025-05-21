@@ -40,7 +40,7 @@ def main():
             on_change=regex_input_callbk
         )
 
-        # Show stylish buttons after selection
+        # Styled button section
         if st.session_state.regex_input != "--- Select ---":
             st.markdown("""
                 <style>
@@ -57,6 +57,10 @@ def main():
                 div.stButton > button:hover {
                     background-color: #3e8e41;
                 }
+                .no-green .stButton > button {
+                    background-color: #999 !important;
+                    color: white !important;
+                }
                 </style>
             """, unsafe_allow_html=True)
 
@@ -64,12 +68,9 @@ def main():
 
             with col1:
                 if st.button("🔄 Clear"):
-                    st.session_state.regex_input = "--- Select ---"
-                    st.session_state.string_input = ""
-                    st.session_state.disabled = True
-                    st.session_state.placeholder_text = ""
-                    st.session_state.show_cfg = False
-                    st.session_state.show_pda = False
+                    for key in ["regex_input", "string_input", "disabled", "placeholder_text", "show_cfg", "show_pda"]:
+                        if key in st.session_state:
+                            del st.session_state[key]
                     st.experimental_rerun()
 
             with col2:
@@ -90,11 +91,11 @@ def main():
             placeholder=st.session_state.placeholder_text
         )
 
-        # Validate button
-        validate_button = st.button(
-            label="Validate",
-            disabled=st.session_state.disabled
-        )
+        # Validate button (no green)
+        with st.container():
+            st.markdown('<div class="no-green">', unsafe_allow_html=True)
+            validate_button = st.button("Validate", key="validate_button", disabled=st.session_state.disabled)
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # Show DFA/CFG/PDA
         if regex_input == utils.regex_options[1]:
