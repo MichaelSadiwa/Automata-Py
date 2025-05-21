@@ -190,22 +190,32 @@ dfa_2 = {
 }
 
 # CFG for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
-cfg_1 = '''
-        S -> XYZ \n
-        X -> aX | bX | aa | bb \n
-        Y -> aaY | bbY | ab | ba | aba \n
-        Z -> babZ | abaZ | bbbZ | aaZ | bb | aa | aba | aaaW | babW | bbaW \n
-        W -> aaaW | babW | bbaW | ^
-        '''
+cfg_1 = """
+S -> aS | bS | aaA | bbA \n
+A -> aaA | bbA | abB | baB | abaB \n
+B -> babC | abaC | bbbC \n
+C -> aC | bC | aaC | bbC | D | ^ \n
+D -> bbE | aaE | abaE \n
+E -> aaaF | babF | bbaF \n
+F -> aaaF | babF | bbaF | ^
+"""
+
 
 # CFG for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
 cfg_2 = '''
-        S -> WXYZ \n
-        W -> 1W | 0W | 11 | 00 | 101 | 010 \n
-        X -> 11X | 00X | 11 | 00 | 0 | 1 \n
-        Y -> 1Y | 0Y | 11Y | 101 | 000 | 111 \n
-        Z -> 1Z | 0Z | 11Z | 00Z | 101 | 000 | 111 | 001 | 100 | ^
-        '''
+S  → A B C D E F G H I J \n
+A  → 1 A | 0 A | ε \n
+B  → 11 | 00 | 101 | 010 \n
+C  → 11 C | 00 C | ε \n
+D  → 11 | 00 | 0 | 1 \n
+E  → 1 | 0 | 11 \n
+F  → 11F | 00F | ε \n
+G  → 101 | 000 | 111 \n
+H  → 1H | 0H | ε \n
+I  → 101 | 000 | 111 | 001 | 100 \n
+J  → KJ | ε \n
+K  → 11 | 00 | 1 | 0 \n
+'''
 
 # PDA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 pda_1 = {
