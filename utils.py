@@ -494,20 +494,22 @@ def validate_dfa(dfa, string):
 
 # Generate validation animation
 def animate_dfa_validation(dfa, state_checks, transitions_used):
-    # Generate the base graph once and get its source
+    # Generate the base graph once and render it to get stable positions
     base_dot = generate_dfa_visualization(dfa)
+    
+    # Create a placeholder for the graph
     graph_placeholder = st.empty()
     
-    # Display the initial graph first to stabilize the layout
+    # First render to stabilize the layout
     graph_placeholder.graphviz_chart(base_dot.source, use_container_width=True)
-    time.sleep(0.5)
+    time.sleep(0.5)  # Let the layout stabilize
     
+    # Now we'll work with the rendered positions
     # Track completed transitions for highlighting the path
     completed_transitions = []
     
-    # Iterate through each state check
     for i, state_check in enumerate(state_checks):
-        if len(state_checks) == 0:
+        if not state_check:
             continue
             
         if len(state_check) == 3:
@@ -516,30 +518,30 @@ def animate_dfa_validation(dfa, state_checks, transitions_used):
             state, is_valid = state_check
             char = None
         
-        # Create a new graph by copying the base one
+        # Create a new graph by copying the base structure
         dot = Digraph(engine="dot", graph_attr={'rankdir': 'LR'})
-        dot.body = base_dot.body.copy()  # Copy the base layout
         
-        # Clear all nodes and edges to re-add them with styling
-        dot.clear()
-        
-        # Re-add all nodes with default styling first
+        # Copy all nodes with their original positions
         for node in dfa["states"]:
+            # Get the original position attributes from base_dot if possible
+            # This is tricky because graphviz doesn't expose positions easily
+            # So we'll use a different approach...
             if node in dfa["end_states"]:
-                dot.node(node, shape="doublecircle")
+                dot.node(node, shape="doublecircle", pos="0,0")  # Dummy position
             else:
-                dot.node(node, shape="circle")
+                dot.node(node, shape="circle", pos="0,0")  # Dummy position
         
-        # Re-add all edges with default styling
+        # Add all edges
         for transition, target_state in dfa["transitions"].items():
             source_state, symbol = transition
             dot.edge(source_state, target_state, label=symbol)
         
-        # Highlight all previously completed transitions
+        # Now apply the visual changes without affecting layout
+        # Highlight completed transitions
         for src, dest, symbol in completed_transitions:
             dot.edge(src, dest, label=symbol, color="blue", penwidth="2.0")
         
-        # Highlight the current state
+        # Highlight current state
         if is_valid and state in dfa["end_states"]:
             dot.node(state, style="filled", fillcolor="green")
         elif not is_valid:
@@ -547,19 +549,13 @@ def animate_dfa_validation(dfa, state_checks, transitions_used):
         else:
             dot.node(state, style="filled", fillcolor="yellow")
         
-        # If there are transitions and this isn't the last state check
+        # Highlight current transition if applicable
         if i < len(transitions_used) and i < len(state_checks) - 1:
             current_transition = transitions_used[i]
             src, dest, symbol = current_transition
-            
-            # Highlight the current transition
             dot.edge(src, dest, label=symbol, color="red", penwidth="3.0")
-            
-            # Add to completed transitions for next iteration
             completed_transitions.append(current_transition)
         
-        # Display the current state of the graph
+        # Use the same rendering parameters as initial render
         graph_placeholder.graphviz_chart(dot.source, use_container_width=True)
-        
-        # Add a delay for visualization
         time.sleep(1)
