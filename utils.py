@@ -218,7 +218,13 @@ K  → 11 | 00 | 1 | 0 \n
 
 # PDA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 pda_1 = {
-    "states": [f"Read{i}" for i in range(46)],  # 46 states
+    "states": [
+    "Read0", "Read2", "Read4", "Read6", "Read8", "Read9", "Read10", "Read12", "Read13", "Read14",
+    "Read15", "Read16", "Read17", "Read18", "Read19", "Read20", "Read21", "Read22", "Read23", "Read24",
+    "Read25", "Read26", "Read27", "Read28", "Read29", "Read30", "Read31", "Read32", "Read33", "Read34",
+    "Read35", "Read36", "Read37", "Read38", "Read39", "Read40", "Read41", "Read42", "Read43", "Read44",
+    "Read45"
+],  # 46 states
     "alphabet": ["a", "b"],
     "start_state": "Read0",
     "push_states": [None],  # Not using stack operations
