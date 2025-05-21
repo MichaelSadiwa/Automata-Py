@@ -494,22 +494,46 @@ def validate_dfa(dfa, string):
 
 # Generate validation animation
 def animate_dfa_validation(dfa, state_checks, transitions_used):
-    # Create a Streamlit placeholder for the graph
+    # Generate the base graph once and get its source
+    base_dot = generate_dfa_visualization(dfa)
     graph_placeholder = st.empty()
+    
+    # Display the initial graph first to stabilize the layout
+    graph_placeholder.graphviz_chart(base_dot.source, use_container_width=True)
+    time.sleep(0.5)
     
     # Track completed transitions for highlighting the path
     completed_transitions = []
     
     # Iterate through each state check
     for i, state_check in enumerate(state_checks):
+        if len(state_checks) == 0:
+            continue
+            
         if len(state_check) == 3:
             state, is_valid, char = state_check
         else:
             state, is_valid = state_check
             char = None
         
-        # Create a new graph for each step
-        dot = generate_dfa_visualization(dfa)
+        # Create a new graph by copying the base one
+        dot = Digraph(engine="dot", graph_attr={'rankdir': 'LR'})
+        dot.body = base_dot.body.copy()  # Copy the base layout
+        
+        # Clear all nodes and edges to re-add them with styling
+        dot.clear()
+        
+        # Re-add all nodes with default styling first
+        for node in dfa["states"]:
+            if node in dfa["end_states"]:
+                dot.node(node, shape="doublecircle")
+            else:
+                dot.node(node, shape="circle")
+        
+        # Re-add all edges with default styling
+        for transition, target_state in dfa["transitions"].items():
+            source_state, symbol = transition
+            dot.edge(source_state, target_state, label=symbol)
         
         # Highlight all previously completed transitions
         for src, dest, symbol in completed_transitions:
@@ -517,11 +541,11 @@ def animate_dfa_validation(dfa, state_checks, transitions_used):
         
         # Highlight the current state
         if is_valid and state in dfa["end_states"]:
-            dot.node(state, style="filled", fillcolor="green")  # Set end state to green
+            dot.node(state, style="filled", fillcolor="green")
         elif not is_valid:
-            dot.node(state, style="filled", fillcolor="red")  # Set invalid state to red
+            dot.node(state, style="filled", fillcolor="red")
         else:
-            dot.node(state, style="filled", fillcolor="yellow")  # Set state to yellow if valid
+            dot.node(state, style="filled", fillcolor="yellow")
         
         # If there are transitions and this isn't the last state check
         if i < len(transitions_used) and i < len(state_checks) - 1:
