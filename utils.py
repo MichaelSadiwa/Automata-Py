@@ -11,7 +11,7 @@ regex_options = [
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
-  "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", 
+  "states": ["q0", "q1", "q2", "q3", "q4", "q6", "q7", "q8", "q9", "q10", 
                "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18"],
     "alphabet": ["a", "b"],
     "start_state": "q0",
@@ -27,7 +27,7 @@ dfa_1 = {
         
         # (aa+bb)* looping
         ("q3", "a"): "q3",
-        ("q3", "b"): "q5",  # start ab/aba
+        ("q3", "b"): "q7",  # start ab/aba
         ("q4", "a"): "q6",  # start ba
         ("q4", "b"): "q4",
         
