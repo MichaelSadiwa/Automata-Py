@@ -71,18 +71,19 @@ if "initialized" not in st.session_state:
     st.session_state.regex_input = utils.regex_options[0]
     st.session_state.selected_pattern = ""
     st.session_state.trigger_validation = False
+    st.session_state.clear_requested = False
 
 # Sidebar controls
 st.sidebar.title("Navigation")
 col_sb1, col_sb2 = st.sidebar.columns(2)
 with col_sb1:
-    if st.button("📊 PDA"):
-        st.session_state.show_pda = not st.session_state.show_pda
-        st.session_state.show_cfg = False
-with col_sb2:
-    if st.button("📄 CFG"):
+    if st.sidebar.button("📄 CFG"):
         st.session_state.show_cfg = not st.session_state.show_cfg
         st.session_state.show_pda = False
+with col_sb2:
+    if st.sidebar.button("📊 PDA"):
+        st.session_state.show_pda = not st.session_state.show_pda
+        st.session_state.show_cfg = False
 
 # Regex selection
 regex_input = st.sidebar.selectbox(
@@ -124,6 +125,13 @@ if regex_input != utils.regex_options[0]:
         placeholder=st.session_state.placeholder_text
     )
 
+    # Clear handler
+    if st.session_state.clear_requested:
+        st.session_state["string_input"] = ""
+        st.session_state["trigger_validation"] = False
+        st.session_state["clear_requested"] = False
+        st.experimental_rerun()
+
     # Button Row
     colv, colc = st.columns([1, 1])
     with colv:
@@ -136,8 +144,7 @@ if regex_input != utils.regex_options[0]:
         if string_input.strip():
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
             if st.button("Clear Input"):
-                st.session_state.trigger_validation = False
-                st.session_state["string_input"] = ""
+                st.session_state.clear_requested = True
                 st.experimental_rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
