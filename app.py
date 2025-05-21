@@ -1,7 +1,12 @@
 import streamlit as st
 import utils
 
-# Streamlit interface
+# Safe rerun trigger
+if st.session_state.get("do_rerun", False):
+    st.session_state.clear()
+    st.session_state.do_rerun = False
+    st.experimental_rerun()
+
 def main():
     st.set_page_config(page_title="Automata Project")
 
@@ -68,10 +73,7 @@ def main():
 
             with col1:
                 if st.button("🔄 Clear"):
-                    for key in ["regex_input", "string_input", "disabled", "placeholder_text", "show_cfg", "show_pda"]:
-                        if key in st.session_state:
-                            del st.session_state[key]
-                    st.experimental_rerun()
+                    st.session_state.do_rerun = True
 
             with col2:
                 if st.button("📄 Show CFG"):
