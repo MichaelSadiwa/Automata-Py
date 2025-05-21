@@ -50,20 +50,20 @@ def main():
         key="regex_input",
         on_change=regex_input_callbk
     )
-        
-        # Text input for string validation
-        string_input = st.text_input(
-            label = "Enter a string to check its validity for displayed DFA",
-            key="string_input",
-            disabled=st.session_state.disabled,
-            placeholder=st.session_state.placeholder_text
-        )
-        
-        # Validate button to run string validation
-        validate_button = st.button(
-            label = "Validate",
-            disabled=st.session_state.disabled
-        )
+    
+    # Text input for string validation
+    string_input = st.text_input(
+        label = "Enter a string to check its validity for displayed DFA",
+        key="string_input",
+        disabled=st.session_state.disabled,
+        placeholder=st.session_state.placeholder_text
+    )
+    
+    # Validate button to run string validation
+    validate_button = st.button(
+        label = "Validate",
+        disabled=st.session_state.disabled
+    )
         
         # Output for regex_input, display dfa, cfg, and pda of selected regex
         if regex_input == utils.regex_options[1]:
