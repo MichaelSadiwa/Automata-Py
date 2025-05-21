@@ -104,7 +104,6 @@ if "initialized" not in st.session_state:
 # --- Sidebar Layout ---
 st.sidebar.markdown('<div class="sidebar-title">REGEX → DFA, CFG, PDA COMPILER</div>', unsafe_allow_html=True)
 
-# PDA and CFG Toggle (side by side)
 col_sb1, col_sb2 = st.sidebar.columns(2)
 with col_sb1:
     if st.button("📊 View PDA", key="toggle_pda"):
@@ -169,9 +168,8 @@ if regex_input != utils.regex_options[0]:
         if string_input.strip():
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
             if st.button("Clear Input", key="clear_button"):
-                st.session_state.pop("string_input", None)
+                st.session_state["string_input"] = ""
                 st.session_state.trigger_validation = False
-                st.experimental_rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
     # --- DFA GRAPH ---
