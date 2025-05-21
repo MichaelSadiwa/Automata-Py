@@ -236,60 +236,27 @@ K  → 11 | 00 | 1 | 0 \n
 
 # PDA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 pda_1 = {
-    "states": ["Start", "S", "A", "B", "C", "D", "E", "F", "Accept"],
+    "states": ["Start", "Read1", "Read2", "Read3", "Read4", "Read5", "Read6", "Read7", "Read8", "Accept"],
     "alphabet": ["a", "b"],
     "start_state": "Start",
     "push_states": [None],
     "pop_states": [None],
     "accept_states": ["Accept"],
     "transitions": {
-        # Start state transition
-        ("Start", ""): "S",
-        
-        # S state transitions
-        ("S", "a"): "S",           # S -> aS
-        ("S", "b"): "S",           # S -> bS
-        ("S", "aa"): "A",          # S -> aaA
-        ("S", "bb"): "A",          # S -> bbA
-        
-        # A state transitions
-        ("A", "aa"): "A",          # A -> aaA
-        ("A", "bb"): "A",          # A -> bbA
-        ("A", "ab"): "B",          # A -> abB
-        ("A", "ba"): "B",          # A -> baB
-        ("A", "aba"): "B",         # A -> abaB
-        
-        # B state transitions
-        ("B", "bab"): "C",         # B -> babC
-        ("B", "aba"): "C",         # B -> abaC
-        ("B", "bbb"): "C",         # B -> bbbC
-        
-        # C state transitions
-        ("C", "a"): "C",           # C -> aC
-        ("C", "b"): "C",           # C -> bC
-        ("C", "aa"): "C",          # C -> aaC
-        ("C", "bb"): "C",          # C -> bbC
-        ("C", ""): "D",            # C -> D
-        ("C", "^"): "Accept",      # C -> ε (epsilon)
-        
-        # D state transitions
-        ("D", "bb"): "E",          # D -> bbE
-        ("D", "aa"): "E",          # D -> aaE
-        ("D", "aba"): "E",         # D -> abaE
-        
-        # E state transitions
-        ("E", "aaa"): "F",         # E -> aaaF
-        ("E", "bab"): "F",         # E -> babF
-        ("E", "bba"): "F",         # E -> bbaF
-        
-        # F state transitions
-        ("F", "aaa"): "F",         # F -> aaaF
-        ("F", "bab"): "F",         # F -> babF
-        ("F", "bba"): "F",         # F -> bbaF
-        ("F", "^"): "Accept"       # F -> ε (epsilon)
+        ("Start", ""): "Read1",
+        ("Read1", "a,b"): "Read1",  # Initial (a+b)* - any number of a's and b's
+        ("Read1", "a"): "Read2",    # Beginning of the specific pattern
+        ("Read1", "b"): "Read2",
+        ("Read2", "a,b"): "Read3",  # Second character of the pattern
+        ("Read3", "a,b"): "Read4",  # Continuing the pattern
+        ("Read4", "a,b"): "Read5",  # More pattern processing 
+        ("Read5", "a,b"): "Read6",  # More pattern processing
+        ("Read6", "a,b"): "Read7",  # More pattern processing
+        ("Read7", "a,b"): "Read8",  # Final pattern section
+        ("Read8", "a,b"): "Read8",  # Optional repetition at the end
+        ("Read8", "^"): "Accept",   # Accept when finished
     }
 }
-
 # PDA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
 pda_2 = {
     "states": ["Start", "Read1", "Read2", "Read3", "Read4", "Read5", "Read6", "Read7", "Read8", "Read9", "Accept"],
