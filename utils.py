@@ -11,7 +11,7 @@ regex_options = [
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
-  "states": [f"q{i}" for i in range(46)], # 46 states
+    "states": [f"q{i}" for i in range(46)], # 46 states
     "alphabet": ["a", "b"],
     "start_state": "q0",
     "end_states": ["q7", "q1", "q3", "q11","q5"],
@@ -111,9 +111,10 @@ dfa_1 = {
         
     }
 }
+
 # DFA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
 dfa_2 = {
-  "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20", "q21", "q22", "q23", "q24", "q25", "q26", "q27", "q28", "q29", "q30", "q31", "q32"],
+    "states": ["q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8", "q9", "q10", "q11", "q12", "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20", "q21", "q22", "q23", "q24", "q25", "q26", "q27", "q28", "q29", "q30", "q31", "q32"],
     "alphabet": ["1", "0"],
     "start_state": "q0",
     "end_states": ["q32"],
@@ -188,78 +189,204 @@ dfa_2 = {
     }
 }
 
-    
 # CFG for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
-cfg_1 = """
-S -> aS | bS | aaA | bbA \n
-A -> aaA | bbA | abB | baB | abaB \n
-B -> babC | abaC | bbbC \n
-C -> aC | bC | aaC | bbC | D | ^ \n
-D -> bbE | aaE | abaE \n
-E -> aaaF | babF | bbaF \n
-F -> aaaF | babF | bbaF | ^
-"""
+cfg_1 = '''
+        S -> XYZ \n
+        X -> aX | bX | aa | bb \n
+        Y -> aaY | bbY | ab | ba | aba \n
+        Z -> babZ | abaZ | bbbZ | aaZ | bb | aa | aba | aaaW | babW | bbaW \n
+        W -> aaaW | babW | bbaW | ^
+        '''
 
 # CFG for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
 cfg_2 = '''
-S  → A B C D E F G H I J \n
-A  → 1 A | 0 A | ε \n
-B  → 11 | 00 | 101 | 010 \n
-C  → 11 C | 00 C | ε \n
-D  → 11 | 00 | 0 | 1 \n
-E  → 1 | 0 | 11 \n
-F  → 11F | 00F | ε \n
-G  → 101 | 000 | 111 \n
-H  → 1H | 0H | ε \n
-I  → 101 | 000 | 111 | 001 | 100 \n
-J  → KJ | ε \n
-K  → 11 | 00 | 1 | 0 \n
-'''
+        S -> WXYZ \n
+        W -> 1W | 0W | 11 | 00 | 101 | 010 \n
+        X -> 11X | 00X | 11 | 00 | 0 | 1 \n
+        Y -> 1Y | 0Y | 11Y | 101 | 000 | 111 \n
+        Z -> 1Z | 0Z | 11Z | 00Z | 101 | 000 | 111 | 001 | 100 | ^
+        '''
 
 # PDA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 pda_1 = {
-    "states": ["Start", "Read1", "Read2", "Read3", "Read4", "Read5", "Read6", "Read7", "Read8", "Accept"],
+    "states": [f"Read{i}" for i in range(46)],  # 46 states matching the DFA but with Read prefix
     "alphabet": ["a", "b"],
-    "start_state": "Start",
+    "start_state": "Read0",
     "push_states": [None],
     "pop_states": [None],
-    "accept_states": ["Accept"],
+    "accept_states": ["Read7", "Read1", "Read3", "Read11", "Read5"],  # Matching the DFA's end_states but with Read prefix
     "transitions": {
-        ("Start", ""): "Read1",
-        ("Read1", "a,b"): "Read1",  # Initial (a+b)* - any number of a's and b's
-        ("Read1", "a"): "Read2",    # Beginning of the specific pattern
-        ("Read1", "b"): "Read2",
-        ("Read2", "a,b"): "Read3",  # Second character of the pattern
-        ("Read3", "a,b"): "Read4",  # Continuing the pattern
-        ("Read4", "a,b"): "Read5",  # More pattern processing 
-        ("Read5", "a,b"): "Read6",  # More pattern processing
-        ("Read6", "a,b"): "Read7",  # More pattern processing
-        ("Read7", "a,b"): "Read8",  # Final pattern section
-        ("Read8", "a,b"): "Read8",  # Optional repetition at the end
-        ("Read8", "^"): "Accept",   # Accept when finished
+        ("Read0", "b"): "Read45",
+        ("Read0", "a"): "Read44",
+        ("Read45", "a"): "Read44",
+        ("Read45", "b"): "Read41",
+        ("Read44", "a"): "Read39",
+        ("Read44", "b"): "Read45",
+        ("Read39", "a"): "Read43",
+        ("Read39", "b"): "Read35",
+        ("Read35", "a"): "Read31",
+        ("Read35", "b"): "Read41",
+        ("Read31", "b"): "Read25",
+        ("Read31", "a"): "Read30",
+        ("Read25", "a"): "Read23",
+        ("Read25", "b"): "Read42",
+        ("Read42", "b"): "Read22",
+        ("Read42", "a"): "Read38",
+        ("Read38", "b"): "Read33",
+        ("Read38", "a"): "Read39",
+        ("Read33", "a"): "Read29",
+        ("Read33", "b"): "Read40",
+        ("Read29", "a"): "Read30",
+        ("Read29", "b"): "Read26",
+        ("Read43", "b"): "Read33",
+        ("Read43", "a"): "Read43",
+        ("Read30", "a"): "Read43",
+        ("Read30", "b"): "Read24",
+        ("Read26", "a"): "Read22",
+        ("Read26", "b"): "Read42",
+        ("Read24", "a"): "Read22",
+        ("Read24", "b"): "Read41",
+        ("Read40", "a"): "Read23",
+        ("Read40", "b"): "Read37",
+        ("Read41", "a"): "Read38",
+        ("Read41", "b"): "Read36",
+        ("Read36", "a"): "Read32",
+        ("Read36", "b"): "Read36",
+        ("Read37", "a"): "Read32",
+        ("Read37", "b"): "Read22",
+        ("Read32", "a"): "Read30",
+        ("Read32", "b"): "Read28",
+        ("Read28", "a"): "Read27",
+        ("Read28", "b"): "Read34",
+        ("Read27", "a"): "Read23",
+        ("Read27", "b"): "Read22",
+        ("Read23", "a"): "Read39",
+        ("Read23", "b"): "Read22",
+        ("Read34", "a"): "Read30",
+        ("Read34", "b"): "Read22",
+        ("Read22", "a"): "Read18",
+        ("Read22", "b"): "Read20",
+        ("Read20", "a"): "Read18",
+        ("Read20", "b"): "Read16",
+        ("Read18", "a"): "Read13",
+        ("Read18", "b"): "Read21",
+        ("Read21", "a"): "Read13",
+        ("Read21", "b"): "Read16",
+        ("Read13", "a"): "Read12",
+        ("Read13", "b"): "Read6",
+        ("Read16", "a"): "Read9",
+        ("Read16", "b"): "Read15",
+        ("Read9", "a"): "Read17",
+        ("Read9", "b"): "Read21",
+        ("Read17", "a"): "Read11",
+        ("Read17", "b"): "Read6",
+        ("Read6", "a"): "Read2",
+        ("Read6", "b"): "Read19",
+        ("Read19", "a"): "Read11",
+        ("Read19", "b"): "Read15",
+        ("Read15", "a"): "Read10",
+        ("Read15", "b"): "Read8",
+        ("Read10", "a"): "Read17",
+        ("Read10", "b"): "Read1",
+        ("Read2", "a"): "Read12",
+        ("Read2", "b"): "Read7",
+        ("Read7", "a"): "Read14",
+        ("Read7", "b"): "Read8",
+        ("Read1", "a"): "Read12",
+        ("Read1", "b"): "Read15",
+        ("Read14", "a"): "Read4",
+        ("Read14", "b"): "Read7",
+        ("Read8", "a"): "Read3",
+        ("Read8", "b"): "Read8",
+        ("Read12", "a"): "Read4",
+        ("Read12", "b"): "Read6",
+        ("Read3", "a"): "Read4",
+        ("Read3", "b"): "Read7",
+        ("Read11", "a"): "Read4",
+        ("Read11", "b"): "Read6",
+        ("Read4", "a"): "Read5",
+        ("Read4", "b"): "Read6",
+        ("Read5", "a"): "Read5",
+        ("Read5", "b"): "Read6"
     }
 }
 # PDA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
 pda_2 = {
-    "states": ["Start", "Read1", "Read2", "Read3", "Read4", "Read5", "Read6", "Read7", "Read8", "Read9", "Accept"],
+    "states": [f"Read{i}" for i in range(33)] + ["Accept"],  # 33 states (Read0-Read32) plus Accept
     "alphabet": ["1", "0"],
-    "start_state": "Start",
+    "start_state": "Read0",
     "push_states": [None],
     "pop_states": [None],
     "accept_states": ["Accept"],
     "transitions": {
-        ("Start", ""): "Read1",
-        ("Read1", "0,1"): "Read1",
-        ("Read1", "0,1"): "Read2",
-        ("Read2", "0,1"): "Read3",
-        ("Read3", "0,1"): "Read4",
-        ("Read4", "0,1"): "Read5",
-        ("Read5", "0,1"): "Read6",
-        ("Read6", "0,1"): "Read7",
-        ("Read7", "0,1"): "Read8",
-        ("Read8", "0,1"): "Read9",
-        ("Read9", "0,1"): "Read9",
-        ("Read9", "^"): "Accept",
+        ("Read0", "1"): "Read1",
+        ("Read0", "0"): "Read2",
+        ("Read1", "1"): "Read7",
+        ("Read1", "0"): "Read4",
+        ("Read2", "1"): "Read3",
+        ("Read2", "0"): "Read5",
+        ("Read3", "1"): "Read7",
+        ("Read3", "0"): "Read9",
+        ("Read4", "1"): "Read6",
+        ("Read4", "0"): "Read5",
+        ("Read5", "1"): "Read8",
+        ("Read5", "0"): "Read12",
+        ("Read6", "1"): "Read11",
+        ("Read6", "0"): "Read11",
+        ("Read7", "0"): "Read10",
+        ("Read7", "1"): "Read11",
+        ("Read8", "1"): "Read17",
+        ("Read8", "0"): "Read13",
+        ("Read9", "1"): "Read11",
+        ("Read9", "0"): "Read12",
+        ("Read10", "0"): "Read17",
+        ("Read10", "1"): "Read15",
+        ("Read11", "0"): "Read17",
+        ("Read11", "1"): "Read17",
+        ("Read12", "1"): "Read14",
+        ("Read12", "0"): "Read17",
+        ("Read13", "0"): "Read18",
+        ("Read13", "1"): "Read21",
+        ("Read14", "1"): "Read20",
+        ("Read14", "0"): "Read24",
+        ("Read15", "1"): "Read20",
+        ("Read15", "0"): "Read16",
+        ("Read16", "0"): "Read26",
+        ("Read16", "1"): "Read17",
+        ("Read17", "1"): "Read20",
+        ("Read17", "0"): "Read25",
+        ("Read18", "0"): "Read26",
+        ("Read18", "1"): "Read14",
+        ("Read19", "0"): "Read22",
+        ("Read19", "1"): "Read28",
+        ("Read20", "0"): "Read22",
+        ("Read20", "1"): "Read19",
+        ("Read21", "0"): "Read23",
+        ("Read21", "1"): "Read23",
+        ("Read22", "0"): "Read26",
+        ("Read22", "1"): "Read28",
+        ("Read23", "0"): "Read25",
+        ("Read23", "1"): "Read28",
+        ("Read24", "0"): "Read26",
+        ("Read24", "1"): "Read21",
+        ("Read25", "0"): "Read26",
+        ("Read25", "1"): "Read20",
+        ("Read26", "0"): "Read28",
+        ("Read26", "1"): "Read20",
+        ("Read27", "0"): "Read31",
+        ("Read27", "1"): "Read29",
+        ("Read28", "0"): "Read27",
+        ("Read28", "1"): "Read29",
+        ("Read29", "0"): "Read31",
+        ("Read29", "1"): "Read30",
+        ("Read30", "0"): "Read31",
+        ("Read30", "1"): "Read32",
+        ("Read31", "0"): "Read32",
+        ("Read31", "1"): "Read32",
+        ("Read32", "0"): "Read32",
+        ("Read32", "1"): "Read32",
+        # Adding epsilon transition from accepting state to Accept
+        ("Read32", "^"): "Accept"
     }
 }
 
