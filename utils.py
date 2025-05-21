@@ -494,68 +494,41 @@ def validate_dfa(dfa, string):
 
 # Generate validation animation
 def animate_dfa_validation(dfa, state_checks, transitions_used):
-    # Generate the base graph once and render it to get stable positions
-    base_dot = generate_dfa_visualization(dfa)
-    
-    # Create a placeholder for the graph
     graph_placeholder = st.empty()
-    
-    # First render to stabilize the layout
-    graph_placeholder.graphviz_chart(base_dot.source, use_container_width=True)
-    time.sleep(0.5)  # Let the layout stabilize
-    
-    # Now we'll work with the rendered positions
-    # Track completed transitions for highlighting the path
     completed_transitions = []
-    
+
+    # Generate all transitions only once
+    all_edges = list(dfa["transitions"].items())
+
     for i, state_check in enumerate(state_checks):
-        if not state_check:
-            continue
-            
-        if len(state_check) == 3:
-            state, is_valid, char = state_check
-        else:
-            state, is_valid = state_check
-            char = None
-        
-        # Create a new graph by copying the base structure
+        state, is_valid, char = state_check if len(state_check) == 3 else (*state_check, None)
+
         dot = Digraph(engine="dot", graph_attr={'rankdir': 'LR'})
-        
-        # Copy all nodes with their original positions
-        for node in dfa["states"]:
-            # Get the original position attributes from base_dot if possible
-            # This is tricky because graphviz doesn't expose positions easily
-            # So we'll use a different approach...
-            if node in dfa["end_states"]:
-                dot.node(node, shape="doublecircle", pos="0,0")  # Dummy position
+
+        # Add states (highlight current state)
+        for s in dfa["states"]:
+            if s == state:
+                color = "green" if s in dfa["end_states"] and is_valid else "red" if not is_valid else "yellow"
+                dot.node(s, style="filled", fillcolor=color, shape="doublecircle" if s in dfa["end_states"] else "circle")
             else:
-                dot.node(node, shape="circle", pos="0,0")  # Dummy position
-        
-        # Add all edges
-        for transition, target_state in dfa["transitions"].items():
-            source_state, symbol = transition
-            dot.edge(source_state, target_state, label=symbol)
-        
-        # Now apply the visual changes without affecting layout
-        # Highlight completed transitions
-        for src, dest, symbol in completed_transitions:
-            dot.edge(src, dest, label=symbol, color="blue", penwidth="2.0")
-        
-        # Highlight current state
-        if is_valid and state in dfa["end_states"]:
-            dot.node(state, style="filled", fillcolor="green")
-        elif not is_valid:
-            dot.node(state, style="filled", fillcolor="red")
-        else:
-            dot.node(state, style="filled", fillcolor="yellow")
-        
-        # Highlight current transition if applicable
-        if i < len(transitions_used) and i < len(state_checks) - 1:
-            current_transition = transitions_used[i]
-            src, dest, symbol = current_transition
-            dot.edge(src, dest, label=symbol, color="red", penwidth="3.0")
-            completed_transitions.append(current_transition)
-        
-        # Use the same rendering parameters as initial render
+                dot.node(s, shape="doublecircle" if s in dfa["end_states"] else "circle")
+
+        # Add all transitions, using blue for completed, red for current
+        for (src, sym), dest in all_edges:
+            edge_color = "black"
+            penwidth = "1.0"
+
+            if (src, dest, sym) in completed_transitions:
+                edge_color = "blue"
+                penwidth = "2.0"
+            elif i < len(transitions_used) and transitions_used[i] == (src, dest, sym):
+                edge_color = "red"
+                penwidth = "3.0"
+
+            dot.edge(src, dest, label=sym, color=edge_color, penwidth=penwidth)
+
+        if i < len(transitions_used):
+            completed_transitions.append(transitions_used[i])
+
         graph_placeholder.graphviz_chart(dot.source, use_container_width=True)
-        time.sleep(1)
+        time.sleep(0.5)
