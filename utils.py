@@ -4,7 +4,7 @@ import time
 
 # List of regular expressions assigned to our group
 regex_options = [
-    "Choose regular expression to test",
+    "",
     "Alphabet Pattern",
     "Binary Pattern"
 ]
