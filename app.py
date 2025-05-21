@@ -13,6 +13,8 @@ def main():
     if len(st.session_state) == 0:
         st.session_state.disabled = True
         st.session_state.placeholder_text = ""
+        st.session_state.show_cfg = False
+        st.session_state.show_pda = False
     
     # Callback function for regex_input
     def regex_input_callbk():
@@ -51,6 +53,19 @@ def main():
 
         # Text input for string validation
         string_input = st.text_input(
+            # Buttons for Clear, CFG, PDA
+            col1, col2, col3 = st.columns([1, 1, 2])
+
+            with col1:
+                if st.button("Clear"):
+                    st.session_state.regex_input = "--- Select ---"
+                    st.session_state.string_input = ""
+                    st.session_state.disabled = True
+                    st.session_state.placeholder_text = ""
+                    st.session_state.show_cfg = False
+                    st.session_state.show_pda = False
+                    st.experimental_rerun()
+                    
             label="Enter a string to check its validity for displayed DFA",
             key="string_input",
             disabled=st.session_state.disabled,
@@ -71,14 +86,16 @@ def main():
                 dfa = utils.generate_dfa_visualization(current_dfa)
                 st.graphviz_chart(dfa)
 
-            with cfg_and_pda_exp:
-                st.write("**Context Free Grammar**")
-                st.markdown(utils.cfg_1)
-
+            if st.session_state.show_cfg:
+                st.write("**Context-Free Grammar**")
+                st.markdown(utils.cfg_1 if regex_input == utils.regex_options[1] else utils.cfg_2)
+            
+            if st.session_state.show_pda:
                 st.write("**Pushdown Automaton**")
-                current_pda = utils.pda_1
+                current_pda = utils.pda_1 if regex_input == utils.regex_options[1] else utils.pda_2
                 pda = utils.generate_pda_visualization(current_pda)
                 st.graphviz_chart(pda)
+
 
         elif regex_input == utils.regex_options[2]:
             current_dfa = utils.dfa_2
