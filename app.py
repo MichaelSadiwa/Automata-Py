@@ -2,7 +2,7 @@ import streamlit as st
 import utils
 import time
 
-# Set page config first
+# Set page config
 st.set_page_config(
     page_title="Regular Expression to DFA, CFG, PDA Compiler",
     layout="wide",
@@ -20,7 +20,7 @@ st.markdown("""
     }
     .stButton > button {
         font-size: 14px;
-        padding: 0.35rem 0.9rem;
+        padding: 0.4rem 1rem;
         border-radius: 6px;
         border: none;
     }
@@ -49,65 +49,66 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .section-title {
-        margin-top: 1.2rem;
+        margin-top: 1.5rem;
         font-size: 17px;
         color: #80ffd3;
     }
-    hr {
-        margin-top: 0.5rem;
+    .translucent-box-valid {
+        background-color: rgba(72, 255, 174, 0.1);
+        padding: 0.5rem;
+        border-left: 3px solid #48ffaa;
         margin-bottom: 0.5rem;
-        border: 1px solid #333;
+        border-radius: 4px;
     }
-    .sidebar-title {
-        font-size: 14px;
-        font-weight: bold;
-        color: #80ffd3;
+    .translucent-box-invalid {
+        background-color: rgba(255, 100, 100, 0.1);
+        padding: 0.5rem;
+        border-left: 3px solid #ff7777;
         margin-bottom: 0.5rem;
+        border-radius: 4px;
+    }
+    hr {
+        margin-top: 0.8rem;
+        margin-bottom: 0.8rem;
+        border: 1px solid #333;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Init session state safely
+# Init session state
 if "initialized" not in st.session_state:
     st.session_state.initialized = True
     st.session_state.disabled = True
     st.session_state.placeholder_text = ""
     st.session_state.show_cfg = False
     st.session_state.show_pda = False
-    st.session_state.trigger_validation = False
     st.session_state.regex_input = utils.regex_options[0]
     st.session_state.selected_pattern = ""
-    st.session_state.string_input = ""
-
-# Callback to clear input safely
-def clear_input_callback():
-    st.session_state.string_input = ""
     st.session_state.trigger_validation = False
+    st.session_state.valid_history = []
+    st.session_state.invalid_history = []
 
 # Sidebar
-st.sidebar.markdown('<div class="sidebar-title">📘 Regex → DFA/CFG/PDA Compiler</div>', unsafe_allow_html=True)
-st.sidebar.title("Navigation")
-
+st.sidebar.markdown("<div style='margin-bottom:10px; font-size:13px; color:#999;'>Regular Expression to DFA, CFG, PDA Compiler</div>", unsafe_allow_html=True)
 col_sb1, col_sb2 = st.sidebar.columns(2)
 with col_sb1:
-    if st.button("📊 PDA"):
-        st.session_state.show_pda = not st.session_state.show_pda
-        st.session_state.show_cfg = False
-with col_sb2:
     if st.button("📄 CFG"):
         st.session_state.show_cfg = not st.session_state.show_cfg
         st.session_state.show_pda = False
+with col_sb2:
+    if st.button("📊 PDA"):
+        st.session_state.show_pda = not st.session_state.show_pda
+        st.session_state.show_cfg = False
 
-# Dropdown
+# Regex selector
 regex_input = st.sidebar.selectbox(
     "Choose Regular Expression",
     utils.regex_options,
-    index=utils.regex_options.index(st.session_state.regex_input)
+    index=utils.regex_options.index(st.session_state.regex_input),
+    key="regex_input"
 )
 
-# Determine states
 if regex_input != utils.regex_options[0]:
-    st.session_state.regex_input = regex_input
     st.session_state.disabled = False
 
     if regex_input == utils.regex_options[1]:
@@ -126,19 +127,18 @@ if regex_input != utils.regex_options[0]:
     # Title
     st.title("Regular Expression to Deterministic Finite Automaton, Context-Free Grammar, and Pushdown Automaton Compiler")
 
-    # Show selected regex
+    # Show regex
     st.markdown(f"<div class='regex-box'><strong>Selected Expression:</strong><br>{st.session_state.selected_pattern}</div>", unsafe_allow_html=True)
 
-    # Input box
+    # Input
     string_input = st.text_input(
         "Test String",
-        value=st.session_state.string_input,
         key="string_input",
         disabled=st.session_state.disabled,
         placeholder=st.session_state.placeholder_text
     )
 
-    # Validate and Clear Buttons
+    # Buttons
     colv, colc = st.columns([1, 1])
     with colv:
         st.markdown('<div class="stButton btn-validate">', unsafe_allow_html=True)
@@ -147,39 +147,54 @@ if regex_input != utils.regex_options[0]:
         st.markdown('</div>', unsafe_allow_html=True)
 
     with colc:
-        if st.session_state.string_input.strip():
+        if string_input.strip():
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
-            st.button("Clear Input", on_click=clear_input_callback)
+            if st.button("Clear Input"):
+                st.session_state.trigger_validation = False
+                st.session_state["string_input"] = ""
+                st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # DFA Graph
+    # DFA Visualization
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown('<div class="section-title">🧮 Deterministic Finite Automaton</div>', unsafe_allow_html=True)
     if not string_input.strip():
         st.graphviz_chart(utils.generate_dfa_visualization(current_dfa))
 
-    # CFG View
+    # DFA validation
+    if st.session_state.trigger_validation and string_input.strip():
+        string_input = string_input.strip()
+        if not all(char in current_dfa["alphabet"] for char in string_input):
+            st.session_state.invalid_history.insert(0, string_input)
+            st.session_state.invalid_history = st.session_state.invalid_history[:5]
+            st.error(f"Invalid characters! Allowed: {current_dfa['alphabet']}")
+        else:
+            st.write(f"Analyzing: `{string_input}`")
+            with st.spinner("🔄 The program is tracing..."):
+                is_valid, checks, steps = utils.validate_dfa(current_dfa, string_input)
+                utils.animate_dfa_validation(current_dfa, checks, steps)
+            if is_valid:
+                st.session_state.valid_history.insert(0, string_input)
+                st.session_state.valid_history = st.session_state.valid_history[:5]
+                st.success("✅ String accepted by DFA.")
+            else:
+                st.session_state.invalid_history.insert(0, string_input)
+                st.session_state.invalid_history = st.session_state.invalid_history[:5]
+                st.error("❌ String rejected by DFA.")
+
+    # CFG Display
     if st.session_state.show_cfg:
         st.markdown('<div class="section-title">📄 Context-Free Grammar</div>', unsafe_allow_html=True)
         st.markdown(f"<div class='graph-container'>{current_cfg}</div>", unsafe_allow_html=True)
 
-    # PDA View
+    # PDA Display
     if st.session_state.show_pda:
         st.markdown('<div class="section-title">📊 Pushdown Automaton</div>', unsafe_allow_html=True)
         with st.container():
             st.graphviz_chart(utils.generate_pda_visualization(current_pda), use_container_width=False)
 
-    # DFA validation animation
-    if st.session_state.trigger_validation and string_input.strip():
-        cleaned = string_input.strip()
-        if not all(char in current_dfa["alphabet"] for char in cleaned):
-            st.error(f"Invalid characters! Allowed: {current_dfa['alphabet']}")
-        else:
-            st.write(f"Analyzing: `{cleaned}`")
-            with st.spinner("🔄 The program is tracing..."):
-                is_valid, checks, steps = utils.validate_dfa(current_dfa, cleaned)
-                utils.animate_dfa_validation(current_dfa, checks, steps)
-            if is_valid:
-                st.success("✅ String accepted by DFA.")
-            else:
-                st.error("❌ String rejected by DFA.")
+    # History display
+    if st.session_state.valid_history:
+        st.markdown('<div class="translucent-box-valid"><strong>✅ Latest 5 Valid Strings:</strong><br>' + "<br>".join(st.session_state.valid_history) + "</div>", unsafe_allow_html=True)
+    if st.session_state.invalid_history:
+        st.markdown('<div class="translucent-box-invalid"><strong>❌ Latest 5 Invalid Strings:</strong><br>' + "<br>".join(st.session_state.invalid_history) + "</div>", unsafe_allow_html=True)
