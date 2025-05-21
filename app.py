@@ -159,7 +159,8 @@ if regex_input != utils.regex_options[0]:
         if st.session_state.get("string_input", "").strip():
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
             if st.button("Clear Input", key="clear_button"):
-                st.session_state.clear_input_flag = True
+                st.session_state.string_input = ""  # Safe reset
+                st.session_state.trigger_validation = False  # Optional: reset validation flag
             st.markdown('</div>', unsafe_allow_html=True)
 
     # Clear input logic
