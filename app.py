@@ -146,7 +146,20 @@ if regex_input != utils.regex_options[0]:
     st.title("Regular Expression to Deterministic Finite Automaton, Context-Free Grammar, and Pushdown Automaton Compiler")
     st.markdown(f"<div class='regex-box'><strong>Selected Expression:</strong><br>{st.session_state.selected_pattern}</div>", unsafe_allow_html=True)
 
-     # --- DFA Graph ---
+    string_input = st.text_input(
+        "Test String",
+        key="string_input",
+        disabled=st.session_state.disabled,
+        placeholder=st.session_state.placeholder_text
+    )
+
+    # --- Buttons ---
+    st.markdown('<div class="stButton btn-validate">', unsafe_allow_html=True)
+    if st.button("Validate", key="validate_button", disabled=st.session_state.disabled):
+        st.session_state.trigger_validation = True
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- DFA Graph ---
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown('<div class="section-title">🧮 Deterministic Finite Automaton</div>', unsafe_allow_html=True)
 
@@ -171,20 +184,6 @@ if regex_input != utils.regex_options[0]:
             else:
                 st.session_state.invalid_inputs.append(string_input)
                 st.error("❌ String rejected by DFA.")
-                
-    string_input = st.text_input(
-        "Test String",
-        key="string_input",
-        disabled=st.session_state.disabled,
-        placeholder=st.session_state.placeholder_text
-    )
-
-    # --- Buttons ---
-    st.markdown('<div class="stButton btn-validate">', unsafe_allow_html=True)
-    if st.button("Validate", key="validate_button", disabled=st.session_state.disabled):
-        st.session_state.trigger_validation = True
-    st.markdown('</div>', unsafe_allow_html=True)
-
 
     # --- CFG Section ---
     if st.session_state.show_cfg:
