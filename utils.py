@@ -76,7 +76,7 @@ dfa_2 = {
               "q13", "q14", "q15", "q16", "q17", "q18", "q19", "q20", "q21"],
     "alphabet": ["0", "1"],
     "start_state": "q0",
-    "end_states": ["q19""q20""q21"],
+    "end_states": ["q19", "q20", "q21"],
     "transitions": {
         # ======================
         # Component A: (1+0)*
