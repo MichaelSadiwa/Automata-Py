@@ -2,14 +2,14 @@ import streamlit as st
 import utils
 import time
 
-# Page config
+# Set Streamlit page config
 st.set_page_config(
     page_title="Regular Expression to DFA, CFG, PDA Compiler",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Styles
+# Custom styles
 st.markdown("""
     <style>
     html, body, [class*="css"] {
@@ -49,57 +49,61 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .section-title {
-        margin-top: 1.2rem;
+        margin-top: 1rem;
         font-size: 17px;
         color: #80ffd3;
     }
+    .sidebar-title {
+        font-size: 13px;
+        color: #999;
+        font-weight: bold;
+        margin-top: 10px;
+    }
     hr {
-        margin-top: 0.6rem;
-        margin-bottom: 0.6rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
         border: 1px solid #333;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Session init
-if "initialized" not in st.session_state:
-    st.session_state.initialized = True
-    st.session_state.disabled = True
+# Init session state
+if "regex_input" not in st.session_state:
+    st.session_state.regex_input = utils.regex_options[0]
+    st.session_state.string_input = ""
     st.session_state.placeholder_text = ""
+    st.session_state.selected_pattern = ""
+    st.session_state.disabled = True
     st.session_state.show_cfg = False
     st.session_state.show_pda = False
-    st.session_state.regex_input = utils.regex_options[0]
-    st.session_state.selected_pattern = ""
     st.session_state.trigger_validation = False
 
-# Sidebar header
-st.sidebar.markdown("<div class='regex-box'><strong>Regex to DFA, CFG, PDA Compiler</strong></div>", unsafe_allow_html=True)
-st.sidebar.title("Navigation")
+# Sidebar
+st.sidebar.markdown('<div class="sidebar-title">Regular Expression to Automaton Compiler</div>', unsafe_allow_html=True)
+st.sidebar.markdown("---")
 
-# Sidebar buttons side-by-side
 col_sb1, col_sb2 = st.sidebar.columns(2)
 with col_sb1:
-    if st.button("📊 PDA"):
-        st.session_state.show_pda = not st.session_state.show_pda
-        st.session_state.show_cfg = False
-with col_sb2:
     if st.button("📄 CFG"):
         st.session_state.show_cfg = not st.session_state.show_cfg
         st.session_state.show_pda = False
+with col_sb2:
+    if st.button("📊 PDA"):
+        st.session_state.show_pda = not st.session_state.show_pda
+        st.session_state.show_cfg = False
 
-# Sidebar select
 regex_input = st.sidebar.selectbox(
     "Choose Regular Expression",
     utils.regex_options,
-    index=utils.regex_options.index(st.session_state.regex_input),
-    key="regex_input"
+    index=utils.regex_options.index(st.session_state.regex_input)
 )
 
-# Logic after selection
-if st.session_state.regex_input != utils.regex_options[0]:
+# Logic for selected regex
+if regex_input != utils.regex_options[0]:
+    st.session_state.regex_input = regex_input
     st.session_state.disabled = False
 
-    if st.session_state.regex_input == utils.regex_options[1]:
+    if regex_input == utils.regex_options[1]:
         st.session_state.placeholder_text = "aaababbaaa"
         st.session_state.selected_pattern = "(a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*"
         current_dfa = utils.dfa_1
@@ -112,10 +116,8 @@ if st.session_state.regex_input != utils.regex_options[0]:
         current_pda = utils.pda_2
         current_cfg = utils.cfg_2
 
-    # Title
+    # Title and expression
     st.title("Regular Expression to Deterministic Finite Automaton, Context-Free Grammar, and Pushdown Automaton Compiler")
-
-    # Show regex selected
     st.markdown(f"<div class='regex-box'><strong>Selected Expression:</strong><br>{st.session_state.selected_pattern}</div>", unsafe_allow_html=True)
 
     # Input field
@@ -126,7 +128,7 @@ if st.session_state.regex_input != utils.regex_options[0]:
         placeholder=st.session_state.placeholder_text
     )
 
-    # Buttons
+    # Buttons row
     colv, colc = st.columns([1, 1])
     with colv:
         st.markdown('<div class="stButton btn-validate">', unsafe_allow_html=True)
@@ -139,28 +141,28 @@ if st.session_state.regex_input != utils.regex_options[0]:
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
             if st.button("Clear Input"):
                 st.session_state.trigger_validation = False
-                del st.session_state["string_input"]
-                st.experimental_rerun()
+                st.session_state.string_input = ""
+                st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # DFA Graph
+    # DFA Visual
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown('<div class="section-title">🧮 Deterministic Finite Automaton</div>', unsafe_allow_html=True)
     if not string_input.strip():
         st.graphviz_chart(utils.generate_dfa_visualization(current_dfa))
 
-    # CFG
+    # CFG section
     if st.session_state.show_cfg:
         st.markdown('<div class="section-title">📄 Context-Free Grammar</div>', unsafe_allow_html=True)
         st.markdown(f"<div class='graph-container'>{current_cfg}</div>", unsafe_allow_html=True)
 
-    # PDA
+    # PDA section
     if st.session_state.show_pda:
         st.markdown('<div class="section-title">📊 Pushdown Automaton</div>', unsafe_allow_html=True)
         with st.container():
             st.graphviz_chart(utils.generate_pda_visualization(current_pda), use_container_width=False)
 
-    # Validation
+    # DFA validation
     if st.session_state.trigger_validation and string_input.strip():
         string_input = string_input.strip()
         if not all(char in current_dfa["alphabet"] for char in string_input):
