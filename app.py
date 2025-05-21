@@ -2,14 +2,14 @@ import streamlit as st
 import utils
 import time
 
-# Set config FIRST
+# Page config must be first
 st.set_page_config(
-    page_title="Regular Expression to DFA, CFG, PDA Compiler",
+    page_title="Automata Compiler",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Custom global styles
+# Style overrides
 st.markdown("""
     <style>
     html, body, [class*="css"] {
@@ -20,7 +20,7 @@ st.markdown("""
     }
     .stButton > button {
         font-size: 14px;
-        padding: 0.35rem 0.9rem;
+        padding: 0.4rem 1rem;
         border-radius: 6px;
         border: none;
     }
@@ -49,95 +49,108 @@ st.markdown("""
         margin-bottom: 1rem;
     }
     .section-title {
-        margin-top: 1.3rem;
+        margin-top: 1.5rem;
         font-size: 17px;
         color: #80ffd3;
-    }
-    .highlight-box-invalid {
-        background-color: rgba(255, 0, 0, 0.1);
-        padding: 0.5rem;
-        border-radius: 4px;
-        font-size: 13px;
-    }
-    .highlight-box-valid {
-        background-color: rgba(0, 255, 0, 0.1);
-        padding: 0.5rem;
-        border-radius: 4px;
-        font-size: 13px;
     }
     hr {
         margin-top: 0.8rem;
         margin-bottom: 0.8rem;
         border: 1px solid #333;
     }
+    .sidebar-title {
+        background-color: rgba(255, 255, 255, 0.05);
+        padding: 0.5rem;
+        border-left: 4px solid #48ffaa;
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .recent-box {
+        font-size: 13px;
+        margin-bottom: 10px;
+        padding: 0.5rem;
+        border-radius: 5px;
+        white-space: pre-line;
+    }
+    .invalid-box {
+        background-color: rgba(255, 0, 0, 0.08);
+        color: #ff7f7f;
+    }
+    .valid-box {
+        background-color: rgba(0, 255, 0, 0.08);
+        color: #80ff80;
+    }
     </style>
 """, unsafe_allow_html=True)
 
-# Session state init
+# Initialize session state
 if "initialized" not in st.session_state:
     st.session_state.initialized = True
     st.session_state.disabled = True
     st.session_state.placeholder_text = ""
-    st.session_state.show_cfg = False
-    st.session_state.show_pda = False
+    st.session_state.regex_input = utils.regex_options[0]
     st.session_state.selected_pattern = ""
     st.session_state.trigger_validation = False
-    st.session_state.valid_strings = []
-    st.session_state.invalid_strings = []
+    st.session_state.valid_inputs = []
+    st.session_state.invalid_inputs = []
 
-# Permanent Sidebar Header
-st.sidebar.markdown("## 🧠 Automata Compiler")
-st.sidebar.markdown("---")
+# --- Sidebar ---
+st.sidebar.markdown('<div class="sidebar-title">REGEX → DFA, CFG, PDA COMPILER</div>', unsafe_allow_html=True)
 
-# PDA/CFG Buttons side-by-side
+# PDA / CFG Toggle
 col_sb1, col_sb2 = st.sidebar.columns(2)
 with col_sb1:
-    if st.button("📊 PDA"):
-        st.session_state.show_pda = not st.session_state.show_pda
-        st.session_state.show_cfg = False
+    show_pda = st.button("📊 PDA")
 with col_sb2:
-    if st.button("📄 CFG"):
-        st.session_state.show_cfg = not st.session_state.show_cfg
-        st.session_state.show_pda = False
+    show_cfg = st.button("📄 CFG")
 
-# Regex Selection
+# Expression selection
 regex_input = st.sidebar.selectbox(
     "Choose Regular Expression",
     utils.regex_options,
-    key="regex_input"
+    index=utils.regex_options.index(st.session_state.regex_input),
 )
 
-# Logic when regex is selected
+# Track selection and config
 if regex_input != utils.regex_options[0]:
     st.session_state.disabled = False
+    st.session_state.regex_input = regex_input
 
     if regex_input == utils.regex_options[1]:
         st.session_state.placeholder_text = "aaababbaaa"
-        st.session_state.selected_pattern = "(a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*"
+        st.session_state.selected_pattern = "(a+b)*(aa+bb)..."
         current_dfa = utils.dfa_1
         current_pda = utils.pda_1
         current_cfg = utils.cfg_1
     else:
         st.session_state.placeholder_text = "101101000111"
-        st.session_state.selected_pattern = "(1+0)* (11+00+101+010) (11+00)* (11+00+0+1) (1+0+11) (11+00)* (101+000+111) (1+0)* (101+000+111+001+100) (11+00+1+0)*"
+        st.session_state.selected_pattern = "(1+0)* (11+00+101+010)..."
         current_dfa = utils.dfa_2
         current_pda = utils.pda_2
         current_cfg = utils.cfg_2
 
-    # Show title and selected pattern
+    # --- Valid / Invalid String Logs ---
+    st.sidebar.markdown('<div class="recent-box invalid-box"><b>❌ Latest 5 Invalid Strings</b></div>', unsafe_allow_html=True)
+    if st.session_state.invalid_inputs:
+        st.sidebar.markdown(
+            "<div class='recent-box invalid-box'>" +
+            "\n".join(st.session_state.invalid_inputs[-5:][::-1]) +
+            "</div>", unsafe_allow_html=True
+        )
+
+    st.sidebar.markdown('<div class="recent-box valid-box"><b>✅ Latest 5 Valid Strings</b></div>', unsafe_allow_html=True)
+    if st.session_state.valid_inputs:
+        st.sidebar.markdown(
+            "<div class='recent-box valid-box'>" +
+            "\n".join(st.session_state.valid_inputs[-5:][::-1]) +
+            "</div>", unsafe_allow_html=True
+        )
+
+    # --- Main ---
     st.title("Regular Expression to Deterministic Finite Automaton, Context-Free Grammar, and Pushdown Automaton Compiler")
     st.markdown(f"<div class='regex-box'><strong>Selected Expression:</strong><br>{st.session_state.selected_pattern}</div>", unsafe_allow_html=True)
 
-    # Show recent valid/invalid strings
-    if st.session_state.valid_strings:
-        st.sidebar.markdown("✅ **Latest 5 Valid Strings**", unsafe_allow_html=True)
-        st.sidebar.markdown(f"<div class='highlight-box-valid'>{'<br>'.join(st.session_state.valid_strings[-5:][::-1])}</div>", unsafe_allow_html=True)
-
-    if st.session_state.invalid_strings:
-        st.sidebar.markdown("❌ **Latest 5 Invalid Strings**", unsafe_allow_html=True)
-        st.sidebar.markdown(f"<div class='highlight-box-invalid'>{'<br>'.join(st.session_state.invalid_strings[-5:][::-1])}</div>", unsafe_allow_html=True)
-
-    # Input field
     string_input = st.text_input(
         "Test String",
         key="string_input",
@@ -145,7 +158,6 @@ if regex_input != utils.regex_options[0]:
         placeholder=st.session_state.placeholder_text
     )
 
-    # Validate / Clear Button row
     colv, colc = st.columns([1, 1])
     with colv:
         st.markdown('<div class="stButton btn-validate">', unsafe_allow_html=True)
@@ -157,31 +169,21 @@ if regex_input != utils.regex_options[0]:
         if string_input.strip():
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
             if st.button("Clear Input", key="clear_button"):
-                st.session_state.trigger_validation = False
-                st.session_state["string_input"] = ""
-                st.rerun()
+                del st.session_state["string_input"]
+                st.experimental_rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-    # DFA Graph
+    # DFA Section
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown('<div class="section-title">🧮 Deterministic Finite Automaton</div>', unsafe_allow_html=True)
     if not string_input.strip():
         st.graphviz_chart(utils.generate_dfa_visualization(current_dfa))
 
-    # CFG and PDA
-    if st.session_state.show_cfg:
-        st.markdown('<div class="section-title">📄 Context-Free Grammar</div>', unsafe_allow_html=True)
-        st.markdown(f"<div class='graph-container'>{current_cfg}</div>", unsafe_allow_html=True)
-
-    if st.session_state.show_pda:
-        st.markdown('<div class="section-title">📊 Pushdown Automaton</div>', unsafe_allow_html=True)
-        st.graphviz_chart(utils.generate_pda_visualization(current_pda), use_container_width=False)
-
-    # DFA Validation
+    # Validation
     if st.session_state.trigger_validation and string_input.strip():
         string_input = string_input.strip()
         if not all(char in current_dfa["alphabet"] for char in string_input):
-            st.session_state.invalid_strings.append(string_input)
+            st.session_state.invalid_inputs.append(string_input)
             st.error(f"Invalid characters! Allowed: {current_dfa['alphabet']}")
         else:
             st.write(f"Analyzing: `{string_input}`")
@@ -189,8 +191,17 @@ if regex_input != utils.regex_options[0]:
                 is_valid, checks, steps = utils.validate_dfa(current_dfa, string_input)
                 utils.animate_dfa_validation(current_dfa, checks, steps)
             if is_valid:
-                st.session_state.valid_strings.append(string_input)
+                st.session_state.valid_inputs.append(string_input)
                 st.success("✅ String accepted by DFA.")
             else:
-                st.session_state.invalid_strings.append(string_input)
+                st.session_state.invalid_inputs.append(string_input)
                 st.error("❌ String rejected by DFA.")
+
+    # CFG & PDA
+    if show_cfg:
+        st.markdown('<div class="section-title">📄 Context-Free Grammar</div>', unsafe_allow_html=True)
+        st.markdown(f"<div class='graph-container'>{current_cfg}</div>", unsafe_allow_html=True)
+
+    if show_pda:
+        st.markdown('<div class="section-title">📊 Pushdown Automaton</div>', unsafe_allow_html=True)
+        st.graphviz_chart(utils.generate_pda_visualization(current_pda), use_container_width=False)
