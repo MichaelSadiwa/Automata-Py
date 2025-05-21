@@ -97,7 +97,7 @@ def main():
                 st.graphviz_chart(pda)
 
         # Output for string_input, play validation animation on displayed dfa
-       if validate_button or string_input:
+    if validate_button or string_input:
     string_input = string_input.replace(" ", "")  # Removes any whitespaces
 
     # Check if string_input is empty
