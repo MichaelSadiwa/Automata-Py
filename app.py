@@ -2,14 +2,22 @@ import streamlit as st
 import utils
 import time
 
-# Page config must be first
+# Must be first
 st.set_page_config(
     page_title="Automata Compiler",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded"  # Keeps sidebar fixed
 )
 
-# Style overrides with sidebar collapse disabled
+# Clear trigger handler BEFORE widget creation
+if st.session_state.get("clear_trigger", False):
+    st.session_state.clear_trigger = False
+    if "string_input" in st.session_state:
+        del st.session_state["string_input"]
+    st.session_state["trigger_validation"] = False
+    st.experimental_rerun()
+
+# Style overrides
 st.markdown("""
     <style>
     html, body, [class*="css"] {
@@ -80,10 +88,6 @@ st.markdown("""
         background-color: rgba(0, 255, 0, 0.08);
         color: #80ff80;
     }
-    /* Disable sidebar collapse */
-    button[kind="icon"] {
-        display: none !important;
-    }
     </style>
 """, unsafe_allow_html=True)
 
@@ -97,6 +101,8 @@ if "initialized" not in st.session_state:
     st.session_state.trigger_validation = False
     st.session_state.valid_inputs = []
     st.session_state.invalid_inputs = []
+    st.session_state.show_cfg = False
+    st.session_state.show_pda = False
 
 # --- Sidebar ---
 st.sidebar.markdown('<div class="sidebar-title">REGEX → DFA, CFG, PDA COMPILER</div>', unsafe_allow_html=True)
@@ -104,9 +110,13 @@ st.sidebar.markdown('<div class="sidebar-title">REGEX → DFA, CFG, PDA COMPILER
 # PDA/CFG Toggle
 col_sb1, col_sb2 = st.sidebar.columns(2)
 with col_sb1:
-    show_pda = st.button("📊 PDA")
+    if st.sidebar.button("📊 PDA"):
+        st.session_state.show_pda = not st.session_state.show_pda
+        st.session_state.show_cfg = False
 with col_sb2:
-    show_cfg = st.button("📄 CFG")
+    if st.sidebar.button("📄 CFG"):
+        st.session_state.show_cfg = not st.session_state.show_cfg
+        st.session_state.show_pda = False
 
 # Expression Select
 regex_input = st.sidebar.selectbox(
@@ -156,22 +166,20 @@ if regex_input != utils.regex_options[0]:
         st.markdown('</div>', unsafe_allow_html=True)
 
     with colc:
-        if st.session_state.get("string_input", "").strip():
+        if string_input.strip():
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
             if st.button("Clear Input", key="clear_button"):
-                st.session_state.trigger_validation = False
-                st.session_state.pop("string_input", None)
-                st.experimental_rerun()
+                st.session_state["clear_trigger"] = True  # Trigger safe clear
             st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<hr>", unsafe_allow_html=True)
     st.markdown('<div class="section-title">🧮 Deterministic Finite Automaton</div>', unsafe_allow_html=True)
-    if not st.session_state.get("string_input", "").strip():
+    if not string_input.strip():
         st.graphviz_chart(utils.generate_dfa_visualization(current_dfa))
 
     # DFA validation logic
-    if st.session_state.trigger_validation and st.session_state.get("string_input", "").strip():
-        string_input = st.session_state.string_input.strip()
+    if st.session_state.trigger_validation and string_input.strip():
+        string_input = string_input.strip()
         if not all(char in current_dfa["alphabet"] for char in string_input):
             st.session_state.invalid_inputs.append(string_input)
             st.error(f"Invalid characters! Allowed: {current_dfa['alphabet']}")
@@ -188,10 +196,10 @@ if regex_input != utils.regex_options[0]:
                 st.error("❌ String rejected by DFA.")
 
     # CFG/PDA views
-    if show_cfg:
+    if st.session_state.show_cfg:
         st.markdown('<div class="section-title">📄 Context-Free Grammar</div>', unsafe_allow_html=True)
         st.markdown(f"<div class='graph-container'>{current_cfg}</div>", unsafe_allow_html=True)
 
-    if show_pda:
+    if st.session_state.show_pda:
         st.markdown('<div class="section-title">📊 Pushdown Automaton</div>', unsafe_allow_html=True)
         st.graphviz_chart(utils.generate_pda_visualization(current_pda), use_container_width=False)
