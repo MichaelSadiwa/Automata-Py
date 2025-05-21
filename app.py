@@ -14,7 +14,7 @@ def main():
 
     # Callback for regex selector
     def regex_input_callbk():
-        if st.session_state.regex_input == "--- Select ---":
+        if st.session_state.regex_input == "Choose regular expression":
             st.session_state.disabled = True
         else:
             st.session_state.disabled = False
@@ -72,12 +72,12 @@ def main():
                     st.session_state.clear_trigger = True
 
             with col2:
-                if st.button("📄 Show CFG"):
+                if st.button("📄 View Context-Free Grammar"):
                     st.session_state.show_cfg = not st.session_state.show_cfg
                     st.session_state.show_pda = False
 
             with col3:
-                if st.button("📊 Show PDA"):
+                if st.button("📊 View Push Down Automata"):
                     st.session_state.show_pda = not st.session_state.show_pda
                     st.session_state.show_cfg = False
 
