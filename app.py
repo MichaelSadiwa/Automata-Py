@@ -44,7 +44,7 @@ def main():
  
         
         # Select box input to select regex
-       regex_input = st.selectbox(
+    regex_input = st.selectbox(
         label="Select a Regular Expression",
         options=utils.regex_options,
         key="regex_input",
