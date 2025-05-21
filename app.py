@@ -5,10 +5,7 @@ import utils
 # Streamlit interface
 def main():
     # Set page title and icon
-    st.set_page_config(
-        page_title="Automata Validator",
-       
-    )
+    
 
     # Initialize streamlit session state values
     if len(st.session_state) == 0:
@@ -42,20 +39,7 @@ def main():
     cfg_and_pda_exp = st.expander("Show CFG and PDA Conversion")
 
     # Code block for title and description
-    with title_con:
-        st.title("Automata Theory")
-        st.markdown(
-            '''
-            A web application that will validate strings and  convert the given regular expressions below to Deterministic Finite Automata (DFA), 
-            Context-Free Grammars (CFG), and Pushdown Automata (PDA).
-
-            **Regular Expressions**
-            1. `(a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*`
-            2. `(1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*`
-
-            '''
-            )
-
+  
     # Code block for regex to dfa feature
     with regex_to_dfa_con:
         st.subheader("Regex to DFA, CFG, & PDA")
