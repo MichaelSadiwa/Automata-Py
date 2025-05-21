@@ -1,4 +1,4 @@
-import streamlit as st
+terimport streamlit as st
 import utils
 
 def main():
@@ -31,7 +31,7 @@ def main():
     regex_to_dfa_con = st.container()
 
     with regex_to_dfa_con:
-        st.subheader("Regex to DFA, CFG, & PDA")
+        st.subheader("Regular Expression to Deterministic Finite Automaton, Context-Free Grammar, and Pushdown Automaton Compiler")
 
         regex_input = st.selectbox(
             label="Select a Regular Expression",
