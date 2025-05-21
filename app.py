@@ -1,7 +1,6 @@
 import streamlit as st
 import utils
 
-
 # Streamlit interface
 def main():
     # Set page title and icon
@@ -15,35 +14,51 @@ def main():
         st.session_state.placeholder_text = ""
         st.session_state.show_cfg = False
         st.session_state.show_pda = False
-    
-    # Callback function for regex_input
+
+    # Handle query params for styled button logic
+    query_params = st.experimental_get_query_params()
+    if "clear" in query_params:
+        st.session_state.regex_input = "--- Select ---"
+        st.session_state.string_input = ""
+        st.session_state.disabled = True
+        st.session_state.placeholder_text = ""
+        st.session_state.show_cfg = False
+        st.session_state.show_pda = False
+        st.experimental_set_query_params()
+
+    if "cfg" in query_params:
+        st.session_state.show_cfg = not st.session_state.show_cfg
+        st.session_state.show_pda = False
+        st.experimental_set_query_params()
+
+    if "pda" in query_params:
+        st.session_state.show_pda = not st.session_state.show_pda
+        st.session_state.show_cfg = False
+        st.experimental_set_query_params()
+
+    # Callback for regex selector
     def regex_input_callbk():
-        # Set disable for string_input and validate_button
         if st.session_state.regex_input == "--- Select ---":
             st.session_state.disabled = True
         else:
             st.session_state.disabled = False
-        
-        # Set placeholder text for string_input
+
         if st.session_state.regex_input == utils.regex_options[1]:
             st.session_state.placeholder_text = "aaababbaaa"
         elif st.session_state.regex_input == utils.regex_options[2]:
             st.session_state.placeholder_text = "101101000111"
         else:
-            st.session_state.placeholder_text = ""  
-        
-        # Clear string_input
+            st.session_state.placeholder_text = ""
+
         st.session_state.string_input = ""
 
-    # Create containers
+    # Interface containers
     regex_to_dfa_con = st.container()
-    cfg_and_pda_exp = st.expander("Show CFG and PDA Conversion")
 
-    # Code block for regex to dfa feature
     with regex_to_dfa_con:
         st.subheader("Regex to DFA, CFG, & PDA")
 
-        # Select box input to select regex
+        # Select box for regex
         regex_input = st.selectbox(
             label="Select a Regular Expression",
             options=utils.regex_options,
@@ -51,34 +66,63 @@ def main():
             on_change=regex_input_callbk
         )
 
-        # Text input for string validation
-        string_input = st.text_input(
-            # Buttons for Clear, CFG, PDA
-            col1, col2, col3 = st.columns([1, 1, 2])
+        # Styled button row
+        st.markdown(
+            """
+            <style>
+            .button-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 1rem;
+            }
+            .custom-btn {
+                background-color: #1f77b4;
+                border: none;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                text-decoration: none;
+                font-size: 16px;
+                border-radius: 8px;
+                transition-duration: 0.3s;
+                cursor: pointer;
+                margin-right: 10px;
+            }
+            .custom-btn:hover {
+                background-color: #0e4a75;
+            }
+            </style>
 
-            with col1:
-                if st.button("Clear"):
-                    st.session_state.regex_input = "--- Select ---"
-                    st.session_state.string_input = ""
-                    st.session_state.disabled = True
-                    st.session_state.placeholder_text = ""
-                    st.session_state.show_cfg = False
-                    st.session_state.show_pda = False
-                    st.experimental_rerun()
-                    
+            <div class="button-row">
+                <form action="?clear=true" method="post">
+                    <button class="custom-btn" type="submit">🔄 Clear</button>
+                </form>
+                <form action="?cfg=true" method="post">
+                    <button class="custom-btn" type="submit">📄 Show CFG</button>
+                </form>
+                <form action="?pda=true" method="post">
+                    <button class="custom-btn" type="submit">📊 Show PDA</button>
+                </form>
+            </div>
+            """,
+            unsafe_allow_html=True
+        )
+
+        # Input string field
+        string_input = st.text_input(
             label="Enter a string to check its validity for displayed DFA",
             key="string_input",
             disabled=st.session_state.disabled,
             placeholder=st.session_state.placeholder_text
         )
 
-        # Validate button to run string validation
+        # Validate button
         validate_button = st.button(
             label="Validate",
             disabled=st.session_state.disabled
         )
 
-        # Output for regex_input, display dfa, cfg, and pda of selected regex
+        # Show DFA + CFG/PDA based on selection
         if regex_input == utils.regex_options[1]:
             current_dfa = utils.dfa_1
             st.write("**Deterministic Finite Automaton**")
@@ -87,15 +131,14 @@ def main():
                 st.graphviz_chart(dfa)
 
             if st.session_state.show_cfg:
-                st.write("**Context-Free Grammar**")
-                st.markdown(utils.cfg_1 if regex_input == utils.regex_options[1] else utils.cfg_2)
-            
+                st.write("**📄 Context-Free Grammar**")
+                st.markdown(utils.cfg_1)
+
             if st.session_state.show_pda:
-                st.write("**Pushdown Automaton**")
-                current_pda = utils.pda_1 if regex_input == utils.regex_options[1] else utils.pda_2
+                st.write("**📊 Pushdown Automaton**")
+                current_pda = utils.pda_1
                 pda = utils.generate_pda_visualization(current_pda)
                 st.graphviz_chart(pda)
-
 
         elif regex_input == utils.regex_options[2]:
             current_dfa = utils.dfa_2
@@ -104,30 +147,26 @@ def main():
                 dfa = utils.generate_dfa_visualization(current_dfa)
                 st.graphviz_chart(dfa)
 
-            with cfg_and_pda_exp:
-                st.write("**Context Free Grammar**")
+            if st.session_state.show_cfg:
+                st.write("**📄 Context-Free Grammar**")
                 st.markdown(utils.cfg_2)
 
-                st.write("**Pushdown Automaton**")
+            if st.session_state.show_pda:
+                st.write("**📊 Pushdown Automaton**")
                 current_pda = utils.pda_2
                 pda = utils.generate_pda_visualization(current_pda)
                 st.graphviz_chart(pda)
 
-        # Output for string_input, play validation animation on displayed dfa
+        # DFA string validation
         if validate_button or string_input:
-            string_input = string_input.replace(" ", "")  # Removes any whitespaces
-
-            # Check if string_input is empty
+            string_input = string_input.replace(" ", "")
             if len(string_input) == 0:
                 st.error("Empty/Invalid Input", icon="❌")
-
-            # Check if string_input has characters not in the alphabet of selected regex
             elif not all(char in current_dfa["alphabet"] for char in string_input):
                 st.error(
-                    f"String '{string_input}' contains invalid characters, please only use characters from the alphabet: {current_dfa['alphabet']}",
+                    f"String '{string_input}' contains invalid characters. Use only: {current_dfa['alphabet']}",
                     icon="❌"
                 )
-
             else:
                 st.write(f"Entered String: `{string_input}`")
                 is_valid, state_checks, transitions_used = utils.validate_dfa(current_dfa, string_input)
