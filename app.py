@@ -15,27 +15,6 @@ def main():
         st.session_state.show_cfg = False
         st.session_state.show_pda = False
 
-    # Handle query params for styled button logic (new API)
-    query_params = st.query_params
-    if "clear" in query_params:
-        st.session_state.regex_input = "--- Select ---"
-        st.session_state.string_input = ""
-        st.session_state.disabled = True
-        st.session_state.placeholder_text = ""
-        st.session_state.show_cfg = False
-        st.session_state.show_pda = False
-        st.query_params.clear()
-
-    if "cfg" in query_params:
-        st.session_state.show_cfg = not st.session_state.show_cfg
-        st.session_state.show_pda = False
-        st.query_params.clear()
-
-    if "pda" in query_params:
-        st.session_state.show_pda = not st.session_state.show_pda
-        st.session_state.show_cfg = False
-        st.query_params.clear()
-
     # Callback for regex selector
     def regex_input_callbk():
         if st.session_state.regex_input == "--- Select ---":
@@ -52,7 +31,7 @@ def main():
 
         st.session_state.string_input = ""
 
-    # Interface containers
+    # Interface container
     regex_to_dfa_con = st.container()
 
     with regex_to_dfa_con:
@@ -66,49 +45,70 @@ def main():
             on_change=regex_input_callbk
         )
 
-        # Styled button row
-        st.markdown(
-            """
-            <style>
-            .button-row {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 1rem;
-            }
-            .custom-btn {
-                background-color: #1f77b4;
-                border: none;
-                color: white;
-                padding: 10px 20px;
-                text-align: center;
-                text-decoration: none;
-                font-size: 16px;
-                border-radius: 8px;
-                transition-duration: 0.3s;
-                cursor: pointer;
-                margin-right: 10px;
-            }
-            .custom-btn:hover {
-                background-color: #0e4a75;
-            }
-            </style>
+        # Show styled buttons only if a regex is selected
+        if st.session_state.regex_input != "--- Select ---":
+            st.markdown(
+                """
+                <style>
+                .button-row {
+                    display: flex;
+                    justify-content: start;
+                    gap: 1rem;
+                    margin-top: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+                .custom-btn {
+                    background-color: #4CAF50;
+                    color: white;
+                    border: none;
+                    padding: 10px 20px;
+                    text-align: center;
+                    text-decoration: none;
+                    font-size: 16px;
+                    border-radius: 8px;
+                    transition: background-color 0.3s;
+                }
+                .custom-btn:hover {
+                    background-color: #3e8e41;
+                }
+                </style>
 
-            <div class="button-row">
-                <form action="?clear=true" method="post">
-                    <button class="custom-btn" type="submit">🔄 Clear</button>
-                </form>
-                <form action="?cfg=true" method="post">
-                    <button class="custom-btn" type="submit">📄 Show CFG</button>
-                </form>
-                <form action="?pda=true" method="post">
-                    <button class="custom-btn" type="submit">📊 Show PDA</button>
-                </form>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
+                <div class="button-row">
+                    <form method="post">
+                        <button class="custom-btn" name="action" value="clear">🔄 Clear</button>
+                        <button class="custom-btn" name="action" value="cfg">📄 Show CFG</button>
+                        <button class="custom-btn" name="action" value="pda">📊 Show PDA</button>
+                    </form>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
 
-        # Input string field
+            # Capture button action
+            action = st.session_state.get("button_action", None)
+            if "action" in st.session_state:
+                action = st.session_state.action
+
+            if st.query_params.get("action") == ["clear"]:
+                st.session_state.regex_input = "--- Select ---"
+                st.session_state.string_input = ""
+                st.session_state.disabled = True
+                st.session_state.placeholder_text = ""
+                st.session_state.show_cfg = False
+                st.session_state.show_pda = False
+                st.query_params.clear()
+
+            elif st.query_params.get("action") == ["cfg"]:
+                st.session_state.show_cfg = not st.session_state.show_cfg
+                st.session_state.show_pda = False
+                st.query_params.clear()
+
+            elif st.query_params.get("action") == ["pda"]:
+                st.session_state.show_pda = not st.session_state.show_pda
+                st.session_state.show_cfg = False
+                st.query_params.clear()
+
+        # Text input for string validation
         string_input = st.text_input(
             label="Enter a string to check its validity for displayed DFA",
             key="string_input",
