@@ -452,10 +452,11 @@ def generate_pda_visualization(pda):
 # Validate given string for DFA 
 def validate_dfa(dfa, string):
     state_checks = []
+    transitions_used = []
     current_state = dfa["start_state"]
 
     # Iterate through each character in string
-    for char in string:
+    for i, char in enumerate(string):
         # Check if transition has "0,1", if so replace char with "0,1"
         if (current_state,"0,1") in dfa["transitions"].keys():
             char = "0,1"
@@ -466,50 +467,75 @@ def validate_dfa(dfa, string):
         
         transition = (current_state, char)
         transition_exists = transition in dfa["transitions"].keys()
-        state_checks.append((current_state, transition_exists))
+        
+        # Store the state, validity, and the character that was processed
+        state_checks.append((current_state, transition_exists, char))
 
         # Check if current char is in transitions
         if transition_exists:
-            current_state = dfa["transitions"][transition]
+            next_state = dfa["transitions"][transition]
+            # Store the transition that was used
+            transitions_used.append((current_state, next_state, char))
+            current_state = next_state
         # Return False if current character in the string is not in the dfa transitions
         else:
-            return False, state_checks
+            return False, state_checks, transitions_used
     
     # Add state check for last transition
     if current_state in dfa["end_states"]:
-        state_checks.append((current_state, True))
+        state_checks.append((current_state, True, None))
     else:
-        state_checks.append((current_state, False))
+        state_checks.append((current_state, False, None))
 
     result = current_state in dfa["end_states"] # Checks if last current_state is in dfa end_states
 
-    # Return the validation result and state_checks array
-    return (result, state_checks)
-
+    # Return the validation result, state_checks array, and transitions_used
+    return (result, state_checks, transitions_used)
 
 # Generate validation animation
-def animate_dfa_validation(dfa, state_checks):
-    dot = generate_dfa_visualization(dfa)  # Generate the DFA visualization
-    graph = st.graphviz_chart(dot.source, use_container_width=True) # Create a Streamlit Graphviz component
-
-    # Iterate through each state in state_checks
-    for state_check in state_checks:
-        state, is_valid = state_check
-
-        time.sleep(1)  # Add a delay for visualization purposes
-
+def animate_dfa_validation(dfa, state_checks, transitions_used):
+    # Create a Streamlit placeholder for the graph
+    graph_placeholder = st.empty()
+    
+    # Track completed transitions for highlighting the path
+    completed_transitions = []
+    
+    # Iterate through each state check
+    for i, state_check in enumerate(state_checks):
+        if len(state_check) == 3:
+            state, is_valid, char = state_check
+        else:
+            state, is_valid = state_check
+            char = None
+        
+        # Create a new graph for each step
+        dot = generate_dfa_visualization(dfa)
+        
+        # Highlight all previously completed transitions
+        for src, dest, symbol in completed_transitions:
+            dot.edge(src, dest, label=symbol, color="blue", penwidth="2.0")
+        
+        # Highlight the current state
         if is_valid and state in dfa["end_states"]:
             dot.node(state, style="filled", fillcolor="green")  # Set end state to green
-            graph.graphviz_chart(dot.source, use_container_width=True) # Render the updated visualization
-
         elif not is_valid:
             dot.node(state, style="filled", fillcolor="red")  # Set invalid state to red
-            graph.graphviz_chart(dot.source, use_container_width=True) # Render the updated visualization
-
         else:
-            dot.node(state, style="filled", fillcolor="yellow") # Set state to yellow if True                
-            graph.graphviz_chart(dot.source, use_container_width=True) # Render the updated visualization
-
-            time.sleep(0.5)  # Add a delay for blink effect
-            dot.node(state, style="filled", fillcolor="white") # Set previous state back to white            
-            graph.graphviz_chart(dot.source, use_container_width=True) # Render the updated visualization
+            dot.node(state, style="filled", fillcolor="yellow")  # Set state to yellow if valid
+        
+        # If there are transitions and this isn't the last state check
+        if i < len(transitions_used) and i < len(state_checks) - 1:
+            current_transition = transitions_used[i]
+            src, dest, symbol = current_transition
+            
+            # Highlight the current transition
+            dot.edge(src, dest, label=symbol, color="red", penwidth="3.0")
+            
+            # Add to completed transitions for next iteration
+            completed_transitions.append(current_transition)
+        
+        # Display the current state of the graph
+        graph_placeholder.graphviz_chart(dot.source, use_container_width=True)
+        
+        # Add a delay for visualization
+        time.sleep(1)
