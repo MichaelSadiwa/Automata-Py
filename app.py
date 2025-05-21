@@ -1,12 +1,6 @@
 import streamlit as st
 import utils
 
-# Safe rerun trigger
-if st.session_state.get("do_rerun", False):
-    st.session_state.clear()
-    st.session_state.do_rerun = False
-    st.experimental_rerun()
-
 def main():
     st.set_page_config(page_title="Automata Project")
 
@@ -16,6 +10,7 @@ def main():
         st.session_state.placeholder_text = ""
         st.session_state.show_cfg = False
         st.session_state.show_pda = False
+        st.session_state.clear_trigger = False  # new flag
 
     # Callback for regex selector
     def regex_input_callbk():
@@ -73,7 +68,8 @@ def main():
 
             with col1:
                 if st.button("🔄 Clear"):
-                    st.session_state.do_rerun = True
+                    st.session_state.string_input = ""
+                    st.session_state.clear_trigger = True
 
             with col2:
                 if st.button("📄 Show CFG"):
@@ -93,7 +89,7 @@ def main():
             placeholder=st.session_state.placeholder_text
         )
 
-        # Validate button (no green)
+        # Validate button (not green)
         with st.container():
             st.markdown('<div class="no-green">', unsafe_allow_html=True)
             validate_button = st.button("Validate", key="validate_button", disabled=st.session_state.disabled)
@@ -135,11 +131,9 @@ def main():
                 st.graphviz_chart(pda)
 
         # DFA string validation
-        if validate_button or string_input:
+        if validate_button and string_input and not st.session_state.clear_trigger:
             string_input = string_input.replace(" ", "")
-            if len(string_input) == 0:
-                st.error("Empty/Invalid Input", icon="❌")
-            elif not all(char in current_dfa["alphabet"] for char in string_input):
+            if not all(char in current_dfa["alphabet"] for char in string_input):
                 st.error(
                     f"String '{string_input}' contains invalid characters. Use only: {current_dfa['alphabet']}",
                     icon="❌"
@@ -152,6 +146,10 @@ def main():
                     st.success(f"The string '{string_input}' is valid for the DFA.", icon="✔️")
                 else:
                     st.error(f"The string '{string_input}' is not valid for the DFA.", icon="❌")
+
+        # Reset clear trigger after page load
+        if st.session_state.clear_trigger:
+            st.session_state.clear_trigger = False
 
 
 if __name__ == "__main__":
