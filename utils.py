@@ -11,7 +11,7 @@ regex_options = [
 
 # DFA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 dfa_1 = {
-     "states" = [f"Read{i}" for i in range(46) if i not in {1, 3, 5, 7, 11}] # 46 states
+     "states": [f"q{i}" for i in range(46)], # 46 states
     "alphabet": ["a", "b"],
     "start_state": "q0",
     "end_states": ["q7", "q1", "q3", "q11","q5"],
