@@ -2,11 +2,17 @@ import streamlit as st
 import utils
 import time
 
+# ✅ Page config must be the first Streamlit command
+st.set_page_config(
+    page_title="Automata Visualizer",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
 # Theme toggle setup
 if "theme" not in st.session_state:
     st.session_state.theme = "light"
 
-# Toggle theme
 theme = st.sidebar.radio("🌗 Theme", ["light", "dark"], index=0 if st.session_state.theme == "light" else 1)
 st.session_state.theme = theme
 
@@ -20,9 +26,7 @@ else:
     font_color = "#f0f0f0"
     card_color = "#2c2c2c"
 
-st.set_page_config(page_title="Automata Visualizer", layout="wide", initial_sidebar_state="expanded")
-
-# Custom styling
+# Style sheet
 st.markdown(f"""
     <style>
     body {{
@@ -59,7 +63,7 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize session state
+# Initialize state
 if "disabled" not in st.session_state:
     st.session_state.disabled = True
     st.session_state.placeholder_text = ""
@@ -70,7 +74,7 @@ if "disabled" not in st.session_state:
     st.session_state.string_input = ""
     st.session_state.selected_pattern = ""
 
-# Sidebar controls
+# Sidebar layout
 st.sidebar.title("Automata Controls")
 regex_input = st.sidebar.selectbox(
     "Choose a Regular Expression",
@@ -79,7 +83,7 @@ regex_input = st.sidebar.selectbox(
     key="regex_input"
 )
 
-# Update placeholder and selected pattern
+# Regex logic
 if st.session_state.regex_input != utils.regex_options[0]:
     st.session_state.disabled = False
 
@@ -90,6 +94,7 @@ if st.session_state.regex_input != utils.regex_options[0]:
         st.session_state.placeholder_text = "101101000111"
         st.session_state.selected_pattern = "(1+0)* (11+00+101+010) (11+00)* (11+00+0+1) (1+0+11) (11+00)* (101+000+111) (1+0)* (101+000+111+001+100) (11+00+1+0)*"
 
+    # Button row
     col1, col2 = st.sidebar.columns([1, 1])
     with col1:
         if st.button("Clear"):
@@ -101,14 +106,15 @@ if st.session_state.regex_input != utils.regex_options[0]:
         else:
             st.session_state.trigger_validation = False
 
+    # CFG/PDA toggles
     if st.button("Show CFG"):
         st.session_state.show_cfg = not st.session_state.show_cfg
         st.session_state.show_pda = False
-
     if st.button("Show PDA"):
         st.session_state.show_pda = not st.session_state.show_pda
         st.session_state.show_cfg = False
 
+    # CFG / PDA content
     if st.session_state.show_cfg:
         st.markdown("### 📄 Context-Free Grammar")
         st.markdown(utils.cfg_1 if st.session_state.regex_input == utils.regex_options[1] else utils.cfg_2)
@@ -120,7 +126,7 @@ if st.session_state.regex_input != utils.regex_options[0]:
         )
         st.graphviz_chart(pda)
 
-# Main visualization area
+# Main area
 st.title("Automata Visualizer")
 
 if st.session_state.regex_input != utils.regex_options[0]:
@@ -145,13 +151,13 @@ if st.session_state.regex_input != utils.regex_options[0]:
         st.graphviz_chart(dfa)
 
     if st.session_state.get("trigger_validation", False) and string_input.strip():
-        string_input = string_input.strip()
-        if not all(char in current_dfa["alphabet"] for char in string_input):
+        cleaned = string_input.strip()
+        if not all(char in current_dfa["alphabet"] for char in cleaned):
             st.error(f"❌ Invalid characters used. Allowed: {current_dfa['alphabet']}")
         else:
-            st.write(f"Analyzing: `{string_input}`")
+            st.write(f"Analyzing: `{cleaned}`")
             with st.spinner("🔄 The program is tracing..."):
-                is_valid, state_checks, transitions_used = utils.validate_dfa(current_dfa, string_input)
+                is_valid, state_checks, transitions_used = utils.validate_dfa(current_dfa, cleaned)
                 utils.animate_dfa_validation(current_dfa, state_checks, transitions_used)
             if is_valid:
                 st.success("✅ The string is accepted by the DFA!")
