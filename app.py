@@ -44,12 +44,12 @@ def main():
  
         
         # Select box input to select regex
-        regex_input = st.selectbox(
-            label = "Select a Regular Expression",
-            options = utils.regex_options,
-            key="regex_input",
-            on_change=regex_input_callbk
-        )
+       regex_input = st.selectbox(
+        label="Select a Regular Expression",
+        options=utils.regex_options,
+        key="regex_input",
+        on_change=regex_input_callbk
+    )
         
         # Text input for string validation
         string_input = st.text_input(
