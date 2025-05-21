@@ -2,7 +2,7 @@ import streamlit as st
 import utils
 import time
 
-# Set config first
+# Set page configuration first
 st.set_page_config(
     page_title="Regular Expression to DFA, CFG, PDA Compiler",
     layout="wide",
@@ -68,10 +68,8 @@ if "initialized" not in st.session_state:
     st.session_state.placeholder_text = ""
     st.session_state.show_cfg = False
     st.session_state.show_pda = False
-    st.session_state.regex_input = utils.regex_options[0]
     st.session_state.selected_pattern = ""
     st.session_state.trigger_validation = False
-    st.session_state.clear_requested = False
 
 # Sidebar controls
 st.sidebar.title("Navigation")
@@ -89,14 +87,13 @@ with col_sb2:
 regex_input = st.sidebar.selectbox(
     "Choose Regular Expression",
     utils.regex_options,
-    index=utils.regex_options.index(st.session_state.regex_input),
+    index=utils.regex_options.index(st.session_state.get("regex_input", utils.regex_options[0])),
     key="regex_input"
 )
 
-# Pattern and logic
+# Process selection
 if regex_input != utils.regex_options[0]:
     st.session_state.disabled = False
-    st.session_state.regex_input = regex_input
 
     if regex_input == utils.regex_options[1]:
         st.session_state.placeholder_text = "aaababbaaa"
@@ -125,13 +122,6 @@ if regex_input != utils.regex_options[0]:
         placeholder=st.session_state.placeholder_text
     )
 
-    # Clear handler
-    if st.session_state.clear_requested:
-        st.session_state["string_input"] = ""
-        st.session_state["trigger_validation"] = False
-        st.session_state["clear_requested"] = False
-        st.experimental_rerun()
-
     # Button Row
     colv, colc = st.columns([1, 1])
     with colv:
@@ -143,8 +133,9 @@ if regex_input != utils.regex_options[0]:
     with colc:
         if string_input.strip():
             st.markdown('<div class="stButton btn-clear">', unsafe_allow_html=True)
-            if st.button("Clear Input"):
-                st.session_state.clear_requested = True
+            if st.button("Clear Input", key="clear_button"):
+                st.session_state.trigger_validation = False
+                del st.session_state["string_input"]
                 st.experimental_rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
