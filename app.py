@@ -97,29 +97,28 @@ def main():
                 st.graphviz_chart(pda)
 
         # Output for string_input, play validation animation on displayed dfa
-        if validate_button or string_input:
-            string_input = string_input.replace(" ", "")  # Removes any whitespaces
+       if validate_button or string_input:
+    string_input = string_input.replace(" ", "")  # Removes any whitespaces
 
-            # Check if string_input is empty
-            if len(string_input) == 0:
-                st.error("Empty/Invalid Input", icon="❌")
+    # Check if string_input is empty
+    if len(string_input) == 0:
+        st.error("Empty/Invalid Input", icon="❌")
 
-            # Check if string_input has characters not in the alphabet of selected regex
-            elif not all(char in current_dfa["alphabet"] for char in string_input):
-                st.error(
-                    f"String '{string_input}' contains invalid characters, please only use characters from the alphabet: {current_dfa['alphabet']}",
-                    icon="❌"
-                )
+    # Check if string_input has characters not in the alphabet of selected regex
+    elif not all(char in current_dfa["alphabet"] for char in string_input):
+        st.error(
+            f"String '{string_input}' contains invalid characters, please only use characters from the alphabet: {current_dfa['alphabet']}",
+            icon="❌"
+        )
 
-            else:
-                st.write(f"Entered String: `{string_input}`")
-                is_valid, state_checks = utils.validate_dfa(current_dfa, string_input)
-                utils.animate_dfa_validation(current_dfa, state_checks)
-                if is_valid:
-                    st.success(f"The string '{string_input}' is valid for the DFA.", icon="✔️")
-                else:
-                    st.error(f"The string '{string_input}' is not valid for the DFA.", icon="❌")
-
+    else:
+        st.write(f"Entered String: `{string_input}`")
+        is_valid, state_checks, transitions_used = utils.validate_dfa(current_dfa, string_input)
+        utils.animate_dfa_validation(current_dfa, state_checks, transitions_used)
+        if is_valid:
+            st.success(f"The string '{string_input}' is valid for the DFA.", icon="✔️")
+        else:
+            st.error(f"The string '{string_input}' is not valid for the DFA.", icon="❌")
 
 if __name__ == "__main__":
     main()
