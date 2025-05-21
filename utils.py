@@ -218,12 +218,12 @@ K  → 11 | 00 | 1 | 0 \n
 
 # PDA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 pda_1 = {
-   "states": [f"Read{i}" for i in range(46)] + ["Accept"],  # 46 states matching the DFA but with Read prefix, plus Accept state
+    "states": [f"Read{i}" for i in range(46)],  # 46 states
     "alphabet": ["a", "b"],
     "start_state": "Read0",
-    "push_states": [None],
-    "pop_states": [None],
-    "accept_states": ["Accept"],  # Using "Accept" as the accepting state name
+    "push_states": [None],  # Not using stack operations
+    "pop_states": [None],   # Not using stack operations
+    "accept_states": ["Accept7", "Accept1", "Accept3", "Accept11", "Accept5"],  # Same as end_states in DFA
     "transitions": {
         ("Read0", "b"): "Read45",
         ("Read0", "a"): "Read44",
@@ -287,42 +287,36 @@ pda_1 = {
         ("Read16", "b"): "Read15",
         ("Read9", "a"): "Read17",
         ("Read9", "b"): "Read21",
-        ("Read17", "a"): "Read11",
+        ("Read17", "a"): "Accept11",
         ("Read17", "b"): "Read6",
         ("Read6", "a"): "Read2",
         ("Read6", "b"): "Read19",
-        ("Read19", "a"): "Read11",
+        ("Read19", "a"): "Accept11",
         ("Read19", "b"): "Read15",
         ("Read15", "a"): "Read10",
         ("Read15", "b"): "Read8",
         ("Read10", "a"): "Read17",
-        ("Read10", "b"): "Read1",
+        ("Read10", "b"): "Accept1",
         ("Read2", "a"): "Read12",
-        ("Read2", "b"): "Read7",
-        ("Read7", "a"): "Read14",
-        ("Read7", "b"): "Read8",
-        ("Read1", "a"): "Read12",
-        ("Read1", "b"): "Read15",
+        ("Read2", "b"): "Accept7",
+        ("Accept7", "a"): "Read14",
+        ("Accept7", "b"): "Read8",
+        ("Accept1", "a"): "Read12",
+        ("Accept1", "b"): "Read15",
         ("Read14", "a"): "Read4",
-        ("Read14", "b"): "Read7",
-        ("Read8", "a"): "Read3",
+        ("Read14", "b"): "Accept7",
+        ("Read8", "a"): "Accept3",
         ("Read8", "b"): "Read8",
         ("Read12", "a"): "Read4",
         ("Read12", "b"): "Read6",
-        ("Read3", "a"): "Read4",
-        ("Read3", "b"): "Read7",
-        ("Read11", "a"): "Read4",
-        ("Read11", "b"): "Read6",
-        ("Read4", "a"): "Read5",
+        ("Accept3", "a"): "Read4",
+        ("Accept3", "b"): "Accept7",
+        ("Accept11", "a"): "Read4",
+        ("Accept11", "b"): "Read6",
+        ("Read4", "a"): "Accept5",
         ("Read4", "b"): "Read6",
-        ("Read5", "a"): "Read5",
-        ("Read5", "b"): "Read6",
-        # Adding transitions to Accept state from accepting states
-        ("Read7", "^"): "Accept",
-        ("Read1", "^"): "Accept",
-        ("Read3", "^"): "Accept",
-        ("Read11", "^"): "Accept",
-        ("Read5", "^"): "Accept"
+        ("Accept5", "a"): "Accept5",
+        ("Accept5", "b"): "Read6",
     }
 }
 # PDA for (1+0)*(11+00+101+010)(11+00)*(11+00+0+1)(1+0+11)(11+00)*(101+000+111)(1+0)*(101+000+111+001+100)(11+00+1+0)*
