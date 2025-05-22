@@ -231,8 +231,7 @@ pda_1 = {
     "pop_states": [None],   # Not using stack operations
     "accept_states": ["Accept7", "Accept1", "Accept3", "Accept11", "Accept5"],  # Same as end_states in DFA
     "transitions": {
-        ("Start", "b"): "Read45",
-        ("Start", "a"): "Read44",
+        ("Start", ""): "Read44",
         ("Read45", "a"): "Read44",
         ("Read45", "b"): "Read41",
         ("Read44", "a"): "Read39",
@@ -334,7 +333,7 @@ pda_2 = {
     "pop_states": [None],
     "accept_states": ["Accept"],
     "transitions": {
-        ("Start", "1"): "Read0",
+        ("Start", ""): "Read0",
         ("Read0", "1"): "Read1",
         ("Read0", "0"): "Read2",
         ("Read1", "1"): "Read7",
