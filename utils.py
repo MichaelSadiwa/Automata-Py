@@ -334,7 +334,7 @@ pda_2 = {
     "pop_states": [None],
     "accept_states": ["Accept"],
     "transitions": {
-        ("Start", "1"): "Read0"
+        ("Start", "1"): "Read0",
         ("Read0", "1"): "Read1",
         ("Read0", "0"): "Read2",
         ("Read1", "1"): "Read7",
