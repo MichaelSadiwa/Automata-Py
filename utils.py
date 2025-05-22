@@ -219,20 +219,20 @@ K  → 11 | 00 | 1 | 0 \n
 # PDA for (a+b)*(aa+bb)(aa+bb)*(ab+ba+aba)(bab+aba+bbb)(a+b+bb+aa)*(bb+aa+aba)(aaa+bab+bba)(aaa+bab+bba)*
 pda_1 = {
     "states": [
-    "Read0", "Read2", "Read4", "Read6", "Read8", "Read9", "Read10", "Read12", "Read13", "Read14",
+    "Start", "Read2", "Read4", "Read6", "Read8", "Read9", "Read10", "Read12", "Read13", "Read14",
     "Read15", "Read16", "Read17", "Read18", "Read19", "Read20", "Read21", "Read22", "Read23", "Read24",
     "Read25", "Read26", "Read27", "Read28", "Read29", "Read30", "Read31", "Read32", "Read33", "Read34",
     "Read35", "Read36", "Read37", "Read38", "Read39", "Read40", "Read41", "Read42", "Read43", "Read44",
     "Read45"
 ],  # 46 states
     "alphabet": ["a", "b"],
-    "start_state": "Read0",
+    "start_state": "Start",
     "push_states": [None],  # Not using stack operations
     "pop_states": [None],   # Not using stack operations
     "accept_states": ["Accept7", "Accept1", "Accept3", "Accept11", "Accept5"],  # Same as end_states in DFA
     "transitions": {
-        ("Read0", "b"): "Read45",
-        ("Read0", "a"): "Read44",
+        ("Start", "b"): "Read45",
+        ("Start", "a"): "Read44",
         ("Read45", "a"): "Read44",
         ("Read45", "b"): "Read41",
         ("Read44", "a"): "Read39",
@@ -329,13 +329,13 @@ pda_1 = {
 pda_2 = {
     "states": [f"Read{i}" for i in range(33)] + ["Accept"],  # 33 states (Read0-Read32) plus Accept
     "alphabet": ["1", "0"],
-    "start_state": "Read0",
+    "start_state": "Start",
     "push_states": [None],
     "pop_states": [None],
     "accept_states": ["Accept"],
     "transitions": {
-        ("Read0", "1"): "Read1",
-        ("Read0", "0"): "Read2",
+        ("Start", "1"): "Read1",
+        ("Start", "0"): "Read2",
         ("Read1", "1"): "Read7",
         ("Read1", "0"): "Read4",
         ("Read2", "1"): "Read3",
